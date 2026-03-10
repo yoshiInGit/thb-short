@@ -1,0 +1,10 @@
+services:
+  app:
+    build: .
+    volumes:
+      - ./src:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+    # 開発時にコンテナを起動したままにするための設定
+    tty: true
+    stdin_open: true
