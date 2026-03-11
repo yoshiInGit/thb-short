@@ -165,13 +165,13 @@ def output_coeroink_txt(script_data: dict) -> dict:
     return result
 
 
-def output_img_request(coeroik_data: dict) -> None:
+def output_img_request(coeroink_data: dict) -> None:
     """必要な画像リストを作成し、ファイルに出力する"""
     print("Running output_img_request...")
     client = _get_gemini_client()
     model = "gemini-3.1-flash-lite-preview"
     
-    prompt = _load_prompt("output_img_request.txt", script_text=coeroik_data.get('break_script', ''))
+    prompt = _load_prompt("output_img_request.txt", script_text=coeroink_data.get('break_script', ''))
     
     response = client.models.generate_content(
         model=model,
