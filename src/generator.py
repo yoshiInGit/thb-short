@@ -9,11 +9,12 @@ from models import MakeScriptResponse, AddCharacterScriptResponse, OutputCoeroin
 
 # ===== Constants & Paths =====
 OUTPUT_DIR = "output"
+INTERMEDIATE_DIR = os.path.join(OUTPUT_DIR, "intermediate")
 PROMPT_DIR = "prompts"
 LOG_DIR = "logs"
-MAKE_SCRIPT_JSON = os.path.join(OUTPUT_DIR, "make_script.json")
-ADD_CHARACTER_JSON = os.path.join(OUTPUT_DIR, "add_character.json")
-COEROINK_JSON = os.path.join(OUTPUT_DIR, "coeroink.json")
+MAKE_SCRIPT_JSON = os.path.join(INTERMEDIATE_DIR, "make_script.json")
+ADD_CHARACTER_JSON = os.path.join(INTERMEDIATE_DIR, "add_character.json")
+COEROINK_JSON = os.path.join(INTERMEDIATE_DIR, "coeroink.json")
 COEROINK_TXT = os.path.join(OUTPUT_DIR, "coeroink.txt")
 IMG_REQUEST_TXT = os.path.join(OUTPUT_DIR, "img_request.txt")
 
@@ -84,7 +85,7 @@ def make_script(trivia_text: str) -> dict:
     }
     
     # 中間データの保存
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    os.makedirs(INTERMEDIATE_DIR, exist_ok=True)
     with open(MAKE_SCRIPT_JSON, "w", encoding="utf-8") as f:
         json.dump(result, f, ensure_ascii=False, indent=2)
     print(f"  -> Saved to {MAKE_SCRIPT_JSON}")
@@ -119,7 +120,7 @@ def add_character_script(script_data: dict) -> dict:
     }
 
     # 中間データの保存
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    os.makedirs(INTERMEDIATE_DIR, exist_ok=True)
     with open(ADD_CHARACTER_JSON, "w", encoding="utf-8") as f:
         json.dump(result, f, ensure_ascii=False, indent=2)
     print(f"  -> Saved to {ADD_CHARACTER_JSON}")
@@ -160,6 +161,7 @@ def output_coeroink_txt(script_data: dict) -> dict:
     print(f"  -> Saved to {COEROINK_TXT}")
     
     # 中間データの保存 (JSON)
+    os.makedirs(INTERMEDIATE_DIR, exist_ok=True)
     result = {"break_script": break_script}
     with open(COEROINK_JSON, "w", encoding="utf-8") as f:
         json.dump(result, f, ensure_ascii=False, indent=2)
