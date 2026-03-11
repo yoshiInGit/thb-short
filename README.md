@@ -8,7 +8,7 @@
 
 1.  **台本生成 (make_script)**: 雑学テキストから動画用のタイトルと基本台本を生成します。
 2.  **キャラクター変換 (add_character_script)**: 台本を指定のキャラクター口調（例：ずんだもん）に変換します。
-3.  **COEIROINK形式出力 (output_coeroik_txt)**: 音声合成ソフトでの読み上げ用に、文節ごとに改行を入れたテキストファイルを出力します。
+3.  **COEIROINK形式出力 (output_coeroink_txt)**: 音声合成ソフトでの読み上げ用に、文節ごとに改行を入れたテキストファイルを出力します。
 4.  **画像リクエスト作成 (output_img_request)**: 台本内容に基づき、動画編集で必要となる画像のリストを書き出します。
 
 ## 🛠 使用技術 (Tech Stack)
@@ -51,7 +51,7 @@ docker-compose up --build
 
 実行後、以下のファイルが生成されます：
 
-- `src/output/coeroik.txt`: 改行済み台本テキスト
+- `src/output/coeroink.txt`: 改行済み台本テキスト
 - `src/output/img_request.txt`: 必要な画像リスト
 
 ### コンテナ内での操作
@@ -73,7 +73,7 @@ python src/main.py
 │   ├── input/           # 入力データ
 │   │   └── trivia.txt   # 元ネタとなる雑学テキスト
 │   └── output/          # 出力データ
-│       ├── coeroik.txt  # 読み上げ用テキスト
+│       ├── coeroink.txt  # 読み上げ用テキスト
 │       └── img_request.txt # 画像リスト
 ├── Dockerfile           # Python環境定義
 ├── docker-compose.yml   # 開発環境設定
