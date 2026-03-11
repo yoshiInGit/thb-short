@@ -11,6 +11,6 @@ class AddCharacterScriptResponse(BaseModel):
     thinking: str = Field(description="思考過程")
     script: str = Field(description="キャラクターの台本の文章")
 
-class OutputCoeroikTxtResponse(BaseModel):
+class OutputCoeroinkTxtResponse(BaseModel):
     thinking: str = Field(description="思考過程")
     break_script: str = Field(description="改行された台本の文章")

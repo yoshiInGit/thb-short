@@ -1,5 +1,5 @@
 import os
-from .generator import make_script, add_character_script, output_coeroik_txt, output_img_request
+from .generator import make_script, add_character_script, output_coeroink_txt, output_img_request
 
 def main():
     print("Starting automatic script generation pipeline...")
@@ -17,8 +17,8 @@ def main():
         # 2. パイプライン処理の実行
         script_data = make_script(trivia_text)
         char_script_data = add_character_script(script_data)
-        coeroik_data = output_coeroik_txt(char_script_data)
-        output_img_request(coeroik_data)
+        coeroink_data = output_coeroink_txt(char_script_data)
+        output_img_request(coeroink_data)
         
         print("Pipeline finished successfully!")
         
