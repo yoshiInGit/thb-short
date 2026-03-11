@@ -151,9 +151,12 @@ def output_coeroink_txt(script_data: dict) -> dict:
     break_script = data.get("break_script", "")
     
     # テキストファイルの保存
+    title = script_data.get("title", "")
+    full_content = f"{title}\n\n{break_script}" if title else break_script
+    
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     with open(COEROINK_TXT, "w", encoding="utf-8") as f:
-        f.write(break_script)
+        f.write(full_content)
     print(f"  -> Saved to {COEROINK_TXT}")
     
     # 中間データの保存 (JSON)
