@@ -168,35 +168,10 @@ def output_coeroink_txt(script_data: dict) -> dict:
     return result
 
 
-def output_img_request(coeroink_data: dict) -> None:
-    """必要な画像リストを作成し、ファイルに出力する"""
-    print("Running output_img_request...")
-    client = _get_gemini_client()
-    model = "gemini-3.1-flash-lite-preview"
-    
-    prompt = _load_prompt("output_img_request.txt", script_text=coeroink_data.get('break_script', ''))
-    
-    response = client.models.generate_content(
-        model=model,
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            temperature=0.7,
-        ),
-    )
-    
-    _save_log("output_img_request", model, prompt, response.text)
-    
-    # テキストファイルの保存
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
-    with open(IMG_REQUEST_TXT, "w", encoding="utf-8") as f:
-        f.write(response.text)
-        
-    print(f"  -> Saved to {IMG_REQUEST_TXT}")
-
 # 個別処理したいときのために、引数で実行する関数を指定できるようにする
 def main():
     parser = argparse.ArgumentParser(description="ショート動画台本生成パイプラインの個別実行ツール")
-    parser.add_argument("command", choices=["all", "make_script", "add_char", "coeroink", "img_req"], help="実行するコマンド")
+    parser.add_argument("command", choices=["all", "make_script", "add_char", "coeroink"], help="実行するコマンド")
     args = parser.parse_args()
 
     if args.command == "all":
@@ -208,8 +183,7 @@ def main():
         script_data = make_script(trivia_text)
         char_script_data = add_character_script(script_data)
         coeroink_data = output_coeroink_txt(char_script_data)
-        output_img_request(coeroink_data)
-        print("Done.")
+        print("Done."+coeroink_data.get("break_script", ""))
 
     elif args.command == "make_script":
         input_path = "input/trivia.txt"
@@ -232,14 +206,6 @@ def main():
         with open(ADD_CHARACTER_JSON, "r", encoding="utf-8") as f:
             char_script_data = json.load(f)
         output_coeroink_txt(char_script_data)
-
-    elif args.command == "img_req":
-        if not os.path.exists(COEROINK_JSON):
-            print(f"Error: {COEROINK_JSON} が見つかりません。まず coeroink を実行してください。")
-            return
-        with open(COEROINK_JSON, "r", encoding="utf-8") as f:
-            coeroink_data = json.load(f)
-        output_img_request(coeroink_data)
 
 if __name__ == "__main__":
     main()
