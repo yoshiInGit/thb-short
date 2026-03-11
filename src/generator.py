@@ -1,8 +1,17 @@
 import os
 import json
+import argparse
 from google import genai
 from google.genai import types
 from .models import MakeScriptResponse, AddCharacterScriptResponse, OutputCoeroikTxtResponse
+
+# ===== Constants & Paths =====
+OUTPUT_DIR = "src/output"
+MAKE_SCRIPT_JSON = os.path.join(OUTPUT_DIR, "make_script.json")
+ADD_CHARACTER_JSON = os.path.join(OUTPUT_DIR, "add_character.json")
+COEROIK_JSON = os.path.join(OUTPUT_DIR, "coeroik.json")
+COEROIK_TXT = os.path.join(OUTPUT_DIR, "coeroik.txt")
+IMG_REQUEST_TXT = os.path.join(OUTPUT_DIR, "img_request.txt")
 
 # ===== Processing Functions =====
 
@@ -37,10 +46,18 @@ def make_script(trivia_text: str) -> dict:
     )
     
     data = json.loads(response.text)
-    return {
+    result = {
         "title": data.get("title", ""),
         "script": data.get("script", "")
     }
+    
+    # 中間データの保存
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    with open(MAKE_SCRIPT_JSON, "w", encoding="utf-8") as f:
+        json.dump(result, f, ensure_ascii=False, indent=2)
+    print(f"  -> Saved to {MAKE_SCRIPT_JSON}")
+    
+    return result
 
 
 def add_character_script(script_data: dict) -> dict:
@@ -67,10 +84,18 @@ def add_character_script(script_data: dict) -> dict:
     )
     
     data = json.loads(response.text)
-    return {
+    result = {
         "title": script_data.get("title", ""),
         "script": data.get("script", "")
     }
+
+    # 中間データの保存
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    with open(ADD_CHARACTER_JSON, "w", encoding="utf-8") as f:
+        json.dump(result, f, ensure_ascii=False, indent=2)
+    print(f"  -> Saved to {ADD_CHARACTER_JSON}")
+
+    return result
 
 
 def output_coeroik_txt(script_data: dict) -> dict:
@@ -100,13 +125,19 @@ def output_coeroik_txt(script_data: dict) -> dict:
     data = json.loads(response.text)
     break_script = data.get("break_script", "")
     
-    output_path = "src/output/coeroik.txt"
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    with open(output_path, "w", encoding="utf-8") as f:
+    # テキストファイルの保存
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    with open(COEROIK_TXT, "w", encoding="utf-8") as f:
         f.write(break_script)
-        
-    print(f"  -> Saved to {output_path}")
-    return {"break_script": break_script}
+    print(f"  -> Saved to {COEROIK_TXT}")
+    
+    # 中間データの保存 (JSON)
+    result = {"break_script": break_script}
+    with open(COEROIK_JSON, "w", encoding="utf-8") as f:
+        json.dump(result, f, ensure_ascii=False, indent=2)
+    print(f"  -> Saved to {COEROIK_JSON}")
+
+    return result
 
 
 def output_img_request(coeroik_data: dict) -> None:
@@ -130,9 +161,61 @@ def output_img_request(coeroik_data: dict) -> None:
         ),
     )
     
-    output_path = "src/output/img_request.txt"
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    with open(output_path, "w", encoding="utf-8") as f:
+    # テキストファイルの保存
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    with open(IMG_REQUEST_TXT, "w", encoding="utf-8") as f:
         f.write(response.text)
         
-    print(f"  -> Saved to {output_path}")
+    print(f"  -> Saved to {IMG_REQUEST_TXT}")
+
+# 個別処理したいときのために、引数で実行する関数を指定できるようにする
+def main():
+    parser = argparse.ArgumentParser(description="ショート動画台本生成パイプラインの個別実行ツール")
+    parser.add_argument("command", choices=["all", "make_script", "add_char", "coeroik", "img_req"], help="実行するコマンド")
+    args = parser.parse_args()
+
+    if args.command == "all":
+        # 1. 入力ファイルの読み込み
+        input_path = "src/input/trivia.txt"
+        with open(input_path, "r", encoding="utf-8") as f:
+            trivia_text = f.read()
+        
+        script_data = make_script(trivia_text)
+        char_script_data = add_character_script(script_data)
+        coeroik_data = output_coeroik_txt(char_script_data)
+        output_img_request(coeroik_data)
+        print("Done.")
+
+    elif args.command == "make_script":
+        input_path = "src/input/trivia.txt"
+        with open(input_path, "r", encoding="utf-8") as f:
+            trivia_text = f.read()
+        make_script(trivia_text)
+
+    elif args.command == "add_char":
+        if not os.path.exists(MAKE_SCRIPT_JSON):
+            print(f"Error: {MAKE_SCRIPT_JSON} が見つかりません。まず make_script を実行してください。")
+            return
+        with open(MAKE_SCRIPT_JSON, "r", encoding="utf-8") as f:
+            script_data = json.load(f)
+        add_character_script(script_data)
+
+    elif args.command == "coeroik":
+        if not os.path.exists(ADD_CHARACTER_JSON):
+            print(f"Error: {ADD_CHARACTER_JSON} が見つかりません。まず add_char を実行してください。")
+            return
+        with open(ADD_CHARACTER_JSON, "r", encoding="utf-8") as f:
+            char_script_data = json.load(f)
+        output_coeroik_txt(char_script_data)
+
+    elif args.command == "img_req":
+        if not os.path.exists(COEROIK_JSON):
+            print(f"Error: {COEROIK_JSON} が見つかりません。まず coeroik を実行してください。")
+            return
+        with open(COEROIK_JSON, "r", encoding="utf-8") as f:
+            coeroik_data = json.load(f)
+        output_img_request(coeroik_data)
+
+if __name__ == "__main__":
+    main()
+
