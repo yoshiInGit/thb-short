@@ -2,3 +2,4 @@ src/prompts/
 .env
 logs/
 src/output/
+src/input/
