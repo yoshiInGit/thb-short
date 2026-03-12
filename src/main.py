@@ -1,6 +1,7 @@
 import os
 import argparse
 from gen_script import make_script, add_character_script, output_coeroink_txt
+from generate_voice_data import generate_voice_data
 
 def gen_script_pipeline():
     """スクリプト生成パイプラインの実行"""
@@ -33,10 +34,15 @@ def main():
     # gen-script コマンドの設定
     subparsers.add_parser("gen-script", help="スクリプト生成パイプラインを実行します")
 
+    # gen-voice コマンドの設定
+    subparsers.add_parser("gen-voice", help="音声データとメタ情報の生成を実行します")
+
     args = parser.parse_args()
 
     if args.command == "gen-script":
         gen_script_pipeline()
+    elif args.command == "gen-voice":
+        generate_voice_data()
     else:
         parser.print_help()
 
