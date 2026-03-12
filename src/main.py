@@ -7,7 +7,7 @@ def gen_script_pipeline():
     print("Starting automatic script generation pipeline...")
     
     # 1. 入力ファイルの読み込み
-    input_path = "src/input/trivia.txt"
+    input_path = "input/trivia.txt"
     if not os.path.exists(input_path):
         print(f"Error: Input file {input_path} not found.")
         return
