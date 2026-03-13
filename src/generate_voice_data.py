@@ -55,7 +55,6 @@ def generate_voice_data():
     combined_audio = AudioSegment.empty()
     words_data = []
     current_time_ms = 0
-    previous_text = ""
 
 
     for wav_path in wav_files:
@@ -63,34 +62,29 @@ def generate_voice_data():
         word_text = _get_accompanying_text(wav_path)
                 
         # 2. 音声ファイルを AudioSegment オブジェクトとして読み込む
-        try:
-            audio_segment = AudioSegment.from_wav(wav_path)
-        except Exception as e:
-            print(f"Error reading {wav_path}: {e}")
-            continue
+        audio_segment = AudioSegment.from_wav(wav_path)
             
-        # 3. 句読点判定による無音(ポーズ)の挿入
-        # 直前の言葉が句読点等で終わっている場合、SILENCE_DURATION_MS 分の無音を追加
-        if _has_punctuation_at_end(previous_text):
-            combined_audio += AudioSegment.silent(duration=SILENCE_DURATION_MS)
-            # 無音分の時間を「直前のテキスト」の終了時間に加算
-            if words_data:
-                words_data[-1]["time_end"] += SILENCE_DURATION_MS
-            current_time_ms += SILENCE_DURATION_MS
-            
+        # 3. 音声の長さ取得と無音(ポーズ)の判定
         duration_ms = len(audio_segment)
+        silence_to_add_ms = 0
         
+        # 現在の単語が句読点等で終わっている場合、無音時間を加算
+        if _has_punctuation_at_end(word_text):
+            silence_to_add_ms = SILENCE_DURATION_MS
+            audio_segment += AudioSegment.silent(duration=silence_to_add_ms)
+            duration_ms += silence_to_add_ms
+            
         # 4. JSONに出力するためのタイムスタンプ(開始・終了時間、単位:ms)を記録
+        # 無音分も現在の単語の終了時間に含めてる
         words_data.append({
             "word": word_text,
             "time_start": current_time_ms,
             "time_end": current_time_ms + duration_ms
         })
         
-        # 5. 音声の結合と時間の更新、直前テキストの保持
+        # 5. 音声の結合と時間の更新
         combined_audio += audio_segment
         current_time_ms += duration_ms
-        previous_text = word_text
 
     # 成果物の保存
     os.makedirs(OUTPUT_DIR, exist_ok=True)
