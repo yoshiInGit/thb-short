@@ -73,6 +73,9 @@ def generate_voice_data():
         # 直前の言葉が句読点等で終わっている場合、SILENCE_DURATION_MS 分の無音を追加
         if _has_punctuation_at_end(previous_text):
             combined_audio += AudioSegment.silent(duration=SILENCE_DURATION_MS)
+            # 無音分の時間を「直前のテキスト」の終了時間に加算
+            if words_data:
+                words_data[-1]["time_end"] += SILENCE_DURATION_MS
             current_time_ms += SILENCE_DURATION_MS
             
         duration_ms = len(audio_segment)
