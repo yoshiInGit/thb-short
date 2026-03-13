@@ -25,3 +25,19 @@ DUMMY_DIR_NAME = "dummy"
 DEFAULT_MODEL = "gemini-3.1-flash-lite-preview"
 DEFAULT_TEMPERATURE = 0.7
 COEROINK_TEMPERATURE = 0.2
+
+# ===== Subtitle Configurations =====
+RESOLUTION = (1080, 1920)
+BG_COLOR = (0, 255, 0) # Green back
+FPS = 24
+OUTPUT_MP4 = os.path.join(OUTPUT_DIR, "subtitle.mp4")
+
+# Text Configuration
+FONT_SIZE = 72
+FONT_COLOR = "white"
+STROKE_COLOR = "black"
+STROKE_WIDTH = 3
+FONT_NAME = "assets/font/LINESeedJP-Bold.ttf" 
+WRAP_WIDTH = 12  # 1行あたりの最大文字数
+TEXT_POS = ('center', 580)
+TRANSITION_DURATION = 0.2  # フェードイン・アウトの時間(秒)
