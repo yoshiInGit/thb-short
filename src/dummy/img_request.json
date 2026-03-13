@@ -1,0 +1,80 @@
+{
+  "thinking": "蚊に刺される理由に関する雑学動画の構成を作成します。視聴者を飽きさせないよう、テーマに合わせて視覚的に分かりやすい単語を英語で選定し、各クリップを4秒以内に収めるように設定しました。",
+  "img_request": [
+    {
+      "time_start": 0,
+      "time_end": 2967,
+      "img_description": "mosquito"
+    },
+    {
+      "time_start": 2967,
+      "time_end": 7246,
+      "img_description": "person+annoyed+mosquito"
+    },
+    {
+      "time_start": 7246,
+      "time_end": 10927,
+      "img_description": "thinking+man"
+    },
+    {
+      "time_start": 10927,
+      "time_end": 15421,
+      "img_description": "carbon+dioxide+gas"
+    },
+    {
+      "time_start": 15421,
+      "time_end": 19961,
+      "img_description": "active+person+running"
+    },
+    {
+      "time_start": 19961,
+      "time_end": 22394,
+      "img_description": "mosquito+flying"
+    },
+    {
+      "time_start": 22394,
+      "time_end": 26650,
+      "img_description": "sweat+sports"
+    },
+    {
+      "time_start": 26650,
+      "time_end": 28723,
+      "img_description": "mosquito+bite"
+    },
+    {
+      "time_start": 28723,
+      "time_end": 31929,
+      "img_description": "blood+type"
+    },
+    {
+      "time_start": 31929,
+      "time_end": 35192,
+      "img_description": "scientific+research"
+    },
+    {
+      "time_start": 35192,
+      "time_end": 38821,
+      "img_description": "blood+type+O"
+    },
+    {
+      "time_start": 38821,
+      "time_end": 43390,
+      "img_description": "human+body+health"
+    },
+    {
+      "time_start": 43390,
+      "time_end": 47060,
+      "img_description": "attractive+sign"
+    },
+    {
+      "time_start": 47060,
+      "time_end": 51687,
+      "img_description": "mosquito+danger"
+    },
+    {
+      "time_start": 51687,
+      "time_end": 54463,
+      "img_description": "funny+face"
+    }
+  ]
+}
