@@ -6,7 +6,7 @@ from moviepy.video.fx import FadeIn, FadeOut
 # ===== Configurations =====
 RESOLUTION = (1080, 1920)
 BG_COLOR = (0, 255, 0) # Green back
-FPS = 1
+FPS = 24
 OUTPUT_DIR = "output"
 OUTPUT_MP4 = os.path.join(OUTPUT_DIR, "subtitle.mp4")
 
