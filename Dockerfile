@@ -1,6 +1,11 @@
 # ベースイメージとして軽量なPython 3.12-slimを使用
 FROM python:3.12-slim
 
+# OSパッケージのインストール（FFmpeg）
+RUN apt-get update && apt-get install -y \
+    ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
+
 # 作業ディレクトリの設定
 WORKDIR /app
 

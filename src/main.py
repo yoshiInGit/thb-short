@@ -1,7 +1,9 @@
 import os
 import argparse
+import json
 from gen_script import make_script, add_character_script, output_coeroink_txt
 from generate_voice_data import generate_voice_data
+from generate_subtitle import generate_subtitle
 
 def gen_script_pipeline():
     """スクリプト生成パイプラインの実行"""
@@ -37,12 +39,23 @@ def main():
     # gen-voice コマンドの設定
     subparsers.add_parser("gen-voice", help="音声データとメタ情報の生成を実行します")
 
+    # gen-sub コマンドの設定
+    subparsers.add_parser("gen-sub", help="字幕動画を生成します")
+
     args = parser.parse_args()
 
     if args.command == "gen-script":
         gen_script_pipeline()
     elif args.command == "gen-voice":
         generate_voice_data()
+    elif args.command == "gen-sub":
+        json_path = os.path.join("output", "intermediate", "voice_data.json")
+        if not os.path.exists(json_path):
+            print(f"Error: {json_path} not found.")
+            return
+        with open(json_path, "r", encoding="utf-8") as f:
+            voice_data = json.load(f)
+        generate_subtitle(voice_data)
     else:
         parser.print_help()
 
