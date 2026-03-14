@@ -94,6 +94,3 @@ def generate_voice_data():
     print(f"  -> Saved voice data JSON to {VOICE_DATA_JSON}")
 
     return VOICE_DATA_JSON
-
-if __name__ == "__main__":
-    generate_voice_data()

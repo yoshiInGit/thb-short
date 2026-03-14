@@ -88,18 +88,3 @@ def generate_subtitle(voice_data: dict):
     print(f"Exporting video to {OUTPUT_MP4}...")
     final_video.write_videofile(OUTPUT_MP4, fps=FPS, codec="libx264", audio=False)
     print("Export complete!")
-
-def main():
-    parser = argparse.ArgumentParser(description="動画生成支援ツール")
-    parser.add_argument("command", choices=["gen-img-req", "gen-sub"], help="実行するコマンド")
-    args = parser.parse_args()
-
-    if args.command == "gen-img-req":
-        voice_data = load_json(VOICE_DATA_JSON)
-        generate_img_request(voice_data)
-    elif args.command == "gen-sub":
-        voice_data = load_json(VOICE_DATA_JSON)
-        generate_subtitle(voice_data)
-
-if __name__ == "__main__":
-    main()

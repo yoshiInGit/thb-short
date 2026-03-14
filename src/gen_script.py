@@ -96,38 +96,3 @@ def output_coeroink_txt(script_data: dict) -> dict:
 
     return result
 
-
-# 個別処理したいときのために、引数で実行する関数を指定できるようにする
-def main():
-    parser = argparse.ArgumentParser(description="ショート動画台本生成パイプラインの個別実行ツール")
-    parser.add_argument("command", choices=["all", "make_script", "add_char", "coeroink"], help="実行するコマンド")
-    args = parser.parse_args()
-
-    if args.command == "all":
-        # 1. 入力ファイルの読み込み
-        input_path = "input/trivia.txt"
-        with open(input_path, "r", encoding="utf-8") as f:
-            trivia_text = f.read()
-        
-        script_data = make_script(trivia_text)
-        char_script_data = add_character_script(script_data)
-        coeroink_data = output_coeroink_txt(char_script_data)
-        print("Done."+coeroink_data.get("break_script", ""))
-
-    elif args.command == "make_script":
-        input_path = "input/trivia.txt"
-        with open(input_path, "r", encoding="utf-8") as f:
-            trivia_text = f.read()
-        make_script(trivia_text)
-
-    elif args.command == "add_char":
-        script_data = load_json(MAKE_SCRIPT_JSON)
-        add_character_script(script_data)
-
-    elif args.command == "coeroink":
-        char_script_data = load_json(ADD_CHARACTER_JSON)
-        output_coeroink_txt(char_script_data)
-
-if __name__ == "__main__":
-    main()
-
