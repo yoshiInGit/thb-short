@@ -38,33 +38,32 @@ def generate_subtitle(voice_data: dict):
 
     words_data = voice_data.get("words", [])
     if not words_data:
-        print("No words data found in JSON.")
-        return
+        raise ValueError("No words data found in JSON.")
 
     # 最後の単語の終了時間をもとに総時間を計算(ミリ秒から秒へ)
-    total_duration = max([float(w["time_end"]) / 1000.0 for w in words_data]) if words_data else 0
+    total_duration_s = max([float(w["time_end"]) / 1000.0 for w in words_data])
 
     # 背景(グリーンバック)のクリップを作成
-    bg_clip = ColorClip(size=RESOLUTION, color=BG_COLOR, duration=total_duration)
+    bg_clip = ColorClip(size=RESOLUTION, color=BG_COLOR, duration=total_duration_s)
 
     clips = [bg_clip]
-
     for item in words_data:
-        word = item.get("word", "")
-        # textwrap を使用して単語の途中で改行されないように処理
-        wrapped_text = textwrap.fill(word, width=WRAP_WIDTH, break_long_words=False)
-        
+
         # ミリ秒を秒に変換
-        start_time = float(item["time_start"]) / 1000.0
-        end_time = float(item["time_end"]) / 1000.0
-        duration = end_time - start_time
-        
+        start_time_s = float(item["time_start"]) / 1000.0
+        end_time_s   = float(item["time_end"]) / 1000.0
+        duration_s   = end_time_s - start_time_s
+
+
         # 単語が空、または時間が異常な場合はスキップ
-        if not word or duration <= 0:
+        word = item.get("word", "")
+        if not word or duration_s <= 0:
             continue
 
+
+        # テキストクリップの作成
         txt_clip = TextClip(
-            text=wrapped_text, 
+            text=word, 
             font_size=FONT_SIZE, 
             color=FONT_COLOR, 
             font=FONT_NAME,
@@ -75,12 +74,10 @@ def generate_subtitle(voice_data: dict):
             text_align='center'
         )
         
-        
+        # クリップのリストに追加
         txt_clip = txt_clip.with_position(TEXT_POS) \
-                           .with_start(start_time) \
-                           .with_duration(duration)
- 
-                               
+                           .with_start(start_time_s) \
+                           .with_duration(duration_s)
         clips.append(txt_clip)
 
     # クリップを重ねて最終的な動画を作成
