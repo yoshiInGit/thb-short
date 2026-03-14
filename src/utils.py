@@ -42,7 +42,7 @@ def load_prompt(filename: str, **kwargs) -> str:
     
     return string.Template(template_str).safe_substitute(**kwargs)
 
-def save_log(func_name: str, model: str, prompt: str, response: str) -> None:
+def save_log(func_name: str, model_name: str, prompt: str, response_text: str) -> None:
     """生成結果をログファイルとして保存する"""
     os.makedirs(LOG_DIR, exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -52,9 +52,9 @@ def save_log(func_name: str, model: str, prompt: str, response: str) -> None:
     log_data = {
         "timestamp": timestamp,
         "function": func_name,
-        "model": model,
+        "model": model_name,
         "prompt": prompt,
-        "response": response
+        "response": response_text
     }
     
     with open(log_path, "w", encoding="utf-8") as f:
@@ -80,7 +80,6 @@ def generate_content_with_gemini(model: str, prompt: str, response_schema: type[
     
     use_dummy = os.environ.get("USE_DUMMY_GEMINI", "false").lower() == "true"
 
-    # 実際のGemini APIを呼び出す
     if not use_dummy:
         client = get_gemini_client()
         return client.models.generate_content(
@@ -92,9 +91,24 @@ def generate_content_with_gemini(model: str, prompt: str, response_schema: type[
                 temperature=temperature,
             ),
         )
-
-    # ダミーモード（USE_DUMMY_GEMINI=true）の場合
     else:
         print(f"  [MOCK] Generating dummy response for {response_schema.__name__}...")
         dummy_data = _generate_dummy_data(response_schema)
         return DummyResponse(dummy_data)
+
+def generate_structured_content(func_name: str, model: str, prompt: str, response_schema: type[BaseModel], temperature: float = 0.7) -> BaseModel:
+    """共通の生成フロー（API呼び出し -> バリデーション -> ログ保存）を実行する"""
+    response = generate_content_with_gemini(
+        model=model,
+        prompt=prompt,
+        response_schema=response_schema,
+        temperature=temperature
+    )
+    
+    # Pydanticモデルとしてパース
+    result = response_schema.model_validate_json(response.text)
+    
+    # ログの保存（副作用だが、共通化のためここで実行）
+    save_log(func_name, model, prompt, response.text)
+    
+    return result

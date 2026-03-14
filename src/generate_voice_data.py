@@ -39,19 +39,18 @@ def _has_punctuation_at_end(text: str) -> bool:
     punctuations = ("、", "。", "！", "？", "!", "?", "…")
     return text[-1] in punctuations
 
-def generate_voice_data():
+def generate_voice_data() -> tuple[AudioSegment, list[dict]]:
     """音声ファイルの結合とメタデータ(JSON)の生成を行う"""
     print("Running generate_voice_data...")
     
     if not os.path.exists(VOICE_DIR):
-        print(f"Error: Voice directory {VOICE_DIR} not found.")
-        return
+        raise FileNotFoundError(f"Voice directory {VOICE_DIR} not found.")
 
+    wav_files = _get_sorted_wav_files(VOICE_DIR)
     combined_audio = AudioSegment.empty()
     words_data = []
     current_time_ms = 0
 
-    wav_files = _get_sorted_wav_files(VOICE_DIR)
     for wav_path in wav_files:
         # 1. 音声に対応するテキストの内容を取得
         word_text = _get_accompanying_text(wav_path)
@@ -81,16 +80,4 @@ def generate_voice_data():
         combined_audio += audio_segment
         current_time_ms += duration_ms
 
-    # 成果物の保存
-    # 統合した音声の保存
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
-    combined_audio.export(OUTPUT_VOICE, format="wav")
-    print(f"  -> Saved combined voice to {OUTPUT_VOICE}")
-    
-    # 音声のタイミングデータの保存
-    os.makedirs(INTERMEDIATE_DIR, exist_ok=True)
-    with open(VOICE_DATA_JSON, "w", encoding="utf-8") as f:
-        json.dump({"words": words_data}, f, ensure_ascii=False, indent=2)
-    print(f"  -> Saved voice data JSON to {VOICE_DATA_JSON}")
-
-    return VOICE_DATA_JSON
+    return combined_audio, words_data

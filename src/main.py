@@ -3,8 +3,12 @@ import argparse
 from gen_script import make_script, add_character_script, output_coeroink_txt
 from generate_voice_data import generate_voice_data
 from generate_video import generate_img_request, generate_subtitle
-from utils import load_json
-from config import MAKE_SCRIPT_JSON, ADD_CHARACTER_JSON, VOICE_DATA_JSON
+from utils import load_json, save_json
+from config import (
+    MAKE_SCRIPT_JSON, ADD_CHARACTER_JSON, COEROINK_JSON, 
+    VOICE_DATA_JSON, IMG_REQUEST_JSON, COEROINK_TXT,
+    OUTPUT_VOICE, OUTPUT_MP4, FPS
+)
 
 def gen_script_pipeline():
     """スクリプト生成パイプラインの実行"""
@@ -19,14 +23,31 @@ def gen_script_pipeline():
         trivia_text = f.read()
         
     try:
-        script_data = make_script(trivia_text)
-        char_script_data = add_character_script(script_data)
-        output_coeroink_txt(char_script_data)
+        # 1. Make Script
+        script_res = make_script(trivia_text)
+        save_json(MAKE_SCRIPT_JSON, script_res.model_dump())
+
+        # 2. Add Character
+        char_res = add_character_script(script_res.script)
+        save_json(ADD_CHARACTER_JSON, char_res.model_dump())
+
+        # 3. Output Coeroink Txt
+        coeroink_res = output_coeroink_txt(char_res.script)
+        save_json(COEROINK_JSON, coeroink_res.model_dump())
+        
+        # テキストファイルの保存
+        full_content = f"{script_res.title}\n\n{coeroink_res.break_script}" if script_res.title else coeroink_res.break_script
+        with open(COEROINK_TXT, "w", encoding="utf-8") as f:
+            f.write(full_content)
+        print(f"  -> Saved text to {COEROINK_TXT}")
+
         print("Pipeline finished successfully!")
     except Exception as e:
         print(f"Error during pipeline execution: {e}")
 
-def main():
+
+def _parse_args():
+    """コマンドライン引数の解析"""
     parser = argparse.ArgumentParser(description="THB Short 動画制作支援ツール")
     subparsers = parser.add_subparsers(dest="command", help="実行するコマンド")
 
@@ -42,36 +63,67 @@ def main():
     video_parser = subparsers.add_parser("gen-video", help="動画生成に関連する操作")
     video_parser.add_argument("step", choices=["gen-img-req", "gen-sub"], help="実行するステップ")
 
-    args = parser.parse_args()
+    return parser.parse_args(), parser
 
-    if args.command == "gen-script":
-        if args.step == "all":
+def _handle_gen_script(args):
+    """台本生成に関連する操作の処理"""
+    match args.step:
+        case "all":
             gen_script_pipeline()
-        elif args.step == "make-script":
+        case "make-script":
             input_path = "input/trivia.txt"
             with open(input_path, "r", encoding="utf-8") as f:
                 trivia_text = f.read()
-            make_script(trivia_text)
-        elif args.step == "add-char":
+            res = make_script(trivia_text)
+            save_json(MAKE_SCRIPT_JSON, res.model_dump())
+        case "add-char":
             script_data = load_json(MAKE_SCRIPT_JSON)
-            add_character_script(script_data)
-        elif args.step == "coeroink":
-            char_script_data = load_json(ADD_CHARACTER_JSON)
-            output_coeroink_txt(char_script_data)
+            res = add_character_script(script_data.get("script", ""))
+            save_json(ADD_CHARACTER_JSON, res.model_dump())
+        case "coeroink":
+            char_data = load_json(ADD_CHARACTER_JSON)
+            res = output_coeroink_txt(char_data.get("script", ""))
+            save_json(COEROINK_JSON, res.model_dump())
 
-    elif args.command == "gen-voice":
-        generate_voice_data()
+def _handle_gen_voice():
+    """音声データ生成の処理"""
+    combined_audio, words_data = generate_voice_data()
+    # 音声の保存
+    combined_audio.export(OUTPUT_VOICE, format="wav")
+    print(f"  -> Saved combined voice to {OUTPUT_VOICE}")
+    # メタデータの保存
+    save_json(VOICE_DATA_JSON, {"words": words_data})
 
-    elif args.command == "gen-video":
-        if args.step == "gen-img-req":
+def _handle_gen_video(args):
+    """動画生成に関連する操作の処理"""
+    match args.step:
+        case "gen-img-req":
             voice_data = load_json(VOICE_DATA_JSON)
-            generate_img_request(voice_data)
-        elif args.step == "gen-sub":
+            res = generate_img_request(voice_data)
+            save_json(IMG_REQUEST_JSON, res.model_dump())
+        case "gen-sub":
             voice_data = load_json(VOICE_DATA_JSON)
-            generate_subtitle(voice_data)
+            video_clip = generate_subtitle(voice_data)
+            print(f"Exporting video to {OUTPUT_MP4}...")
+            video_clip.write_videofile(OUTPUT_MP4, fps=FPS, codec="libx264", audio=False)
+            print("Export complete!")
 
-    else:
-        parser.print_help()
+
+def main():
+    args, parser = _parse_args()
+
+    match args.command:
+        case "gen-script":
+            _handle_gen_script(args)
+            
+        case "gen-voice":
+            _handle_gen_voice()
+            
+        case "gen-video":
+            _handle_gen_video(args)
+            
+        case _:
+            parser.print_help()
 
 if __name__ == "__main__":
     main()
