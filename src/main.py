@@ -70,16 +70,19 @@ def _handle_gen_script(args):
     match args.step:
         case "all":
             gen_script_pipeline()
+
         case "make-script":
             input_path = "input/trivia.txt"
             with open(input_path, "r", encoding="utf-8") as f:
                 trivia_text = f.read()
             res = make_script(trivia_text)
             save_json(MAKE_SCRIPT_JSON, res.model_dump())
+
         case "add-char":
             script_data = load_json(MAKE_SCRIPT_JSON)
             res = add_character_script(script_data.get("script", ""))
             save_json(ADD_CHARACTER_JSON, res.model_dump())
+
         case "coeroink":
             char_data = load_json(ADD_CHARACTER_JSON)
             res = output_coeroink_txt(char_data.get("script", ""))
@@ -88,9 +91,11 @@ def _handle_gen_script(args):
 def _handle_gen_voice():
     """音声データ生成の処理"""
     combined_audio, words_data = generate_voice_data()
+
     # 音声の保存
     combined_audio.export(OUTPUT_VOICE, format="wav")
     print(f"  -> Saved combined voice to {OUTPUT_VOICE}")
+
     # メタデータの保存
     save_json(VOICE_DATA_JSON, {"words": words_data})
 
@@ -101,9 +106,11 @@ def _handle_gen_video(args):
             voice_data = load_json(VOICE_DATA_JSON)
             res = generate_img_request(voice_data)
             save_json(IMG_REQUEST_JSON, res.model_dump())
+
         case "gen-sub":
             voice_data = load_json(VOICE_DATA_JSON)
             video_clip = generate_subtitle(voice_data)
+            
             print(f"Exporting video to {OUTPUT_MP4}...")
             video_clip.write_videofile(OUTPUT_MP4, fps=FPS, codec="libx264", audio=False)
             print("Export complete!")
