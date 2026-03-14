@@ -3,3 +3,5 @@ src/prompts/
 logs/
 src/output/
 src/input/
+src/__pycache__/
+*.pyc
