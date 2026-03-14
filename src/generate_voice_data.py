@@ -2,14 +2,10 @@ import os
 import glob
 import json
 from pydub import AudioSegment
-
-# ===== Constants & Paths =====
-OUTPUT_DIR = "output"
-INTERMEDIATE_DIR = os.path.join(OUTPUT_DIR, "intermediate")
-VOICE_DIR = "input/voice"
-OUTPUT_VOICE = os.path.join(OUTPUT_DIR, "voice.wav")
-OUTPUT_JSON = os.path.join(INTERMEDIATE_DIR, "voice_data.json")
-SILENCE_DURATION_MS = 250
+from config import (
+    OUTPUT_DIR, INTERMEDIATE_DIR, VOICE_DIR, 
+    OUTPUT_VOICE, VOICE_DATA_JSON, SILENCE_DURATION_MS
+)
 
 def _get_sorted_wav_files(directory: str) -> list:
     """ディレクトリから連番順にソートされたWAVファイルのリストを返す"""
@@ -92,11 +88,11 @@ def generate_voice_data():
     print(f"  -> Saved combined voice to {OUTPUT_VOICE}")
     
     os.makedirs(INTERMEDIATE_DIR, exist_ok=True)
-    with open(OUTPUT_JSON, "w", encoding="utf-8") as f:
+    with open(VOICE_DATA_JSON, "w", encoding="utf-8") as f:
         json.dump({"words": words_data}, f, ensure_ascii=False, indent=2)
-    print(f"  -> Saved voice data JSON to {OUTPUT_JSON}")
+    print(f"  -> Saved voice data JSON to {VOICE_DATA_JSON}")
 
-    return OUTPUT_JSON
+    return VOICE_DATA_JSON
 
 if __name__ == "__main__":
     generate_voice_data()

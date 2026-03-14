@@ -5,6 +5,7 @@ OUTPUT_DIR = "output"
 INTERMEDIATE_DIR = os.path.join(OUTPUT_DIR, "intermediate")
 LOG_DIR = "logs"
 PROMPT_DIR = "prompts"
+VOICE_DIR = "input/voice"
 
 # ===== File Paths =====
 # Intermediate Data
@@ -17,6 +18,7 @@ IMG_REQUEST_JSON = os.path.join(INTERMEDIATE_DIR, "img_request.json")
 # Final Outputs
 COEROINK_TXT = os.path.join(OUTPUT_DIR, "coeroink.txt")
 IMG_REQUEST_TXT = os.path.join(OUTPUT_DIR, "img_request.txt")
+OUTPUT_VOICE = os.path.join(OUTPUT_DIR, "voice.wav")
 
 # Dummy Data Directory (relative to src)
 DUMMY_DIR_NAME = "dummy"
@@ -41,3 +43,4 @@ FONT_NAME = "assets/font/LINESeedJP-Bold.ttf"
 WRAP_WIDTH = 12  # 1行あたりの最大文字数
 TEXT_POS = ('center', 580)
 TRANSITION_DURATION = 0.2  # フェードイン・アウトの時間(秒)
+SILENCE_DURATION_MS = 250  # 句読点後の無音時間
