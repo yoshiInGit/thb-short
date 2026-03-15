@@ -3,4 +3,5 @@ src/prompts/
 src/logs/
 src/data/
 src/__pycache__/
+request.md
 *.pyc
