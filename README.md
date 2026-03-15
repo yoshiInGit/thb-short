@@ -66,21 +66,29 @@ python src/main.py [コマンド]
 
 一連の自動化フロー（パイプライン）を実行するためのメインスクリプトです。
 
-| コマンド | 説明 |
-| :--- | :--- |
-| `gen-script` | 雑学テキストの読み込みから、ベース台本生成、キャラクター口調変換、COEIROINK形式出力までの全ステップを連続で実行します。 |
+| コマンド       | 説明                                                                                                                                                                  |
+| :------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `gen-script`   | 雑学テキストの読み込みから、ベース台本生成、キャラクター口調変換、COEIROINK形式出力までの全ステップを連続で実行します。                                               |
 | `gen-subtitle` | 用意された音声ファイル(`src/data/input/voice/`)をもとに、結合音声とタイミングメタデータを生成し、さらにそのデータを使った字幕動画(`subtitle.mp4`)を一気に生成します。 |
 
-### 個別ステージ実行 (`src/run_stage.py`)
+### 個別ステージ実行 (`src/stage_runner.py`)
 
 各処理（ステージ）を単独で個別に実行・テストするための手動実行用スクリプトです。
+
+```bash
+# 台本作成のみ実行
+python src/stage_runner.py make-script
+
+# 画像生成リクエストのみ実行
+python src/stage_runner.py gen-img-req
+```
 
 | 引数 (ステージ) | 説明 |
 | :--- | :--- |
 | `make-script` | 入力テキスト(`src/data/input/trivia.txt`)からベースとなる台本(`make_script.json`)のみを生成します。 |
 | `add-char` | 既存の台本データ(`make_script.json`)を元に、キャラクター口調の台本(`add_character.json`)のみに変換します。 |
-| `coeroink` | 既存のキャラクター台本データ(`add_character.json`)を元に、COEIROINK用テキスト(`coeroink.json` および `coeroink.txt`)のみを出力します。 |
-| `gen-img-req` | 音声のメタデータ(`voice_data.json`)をもとに、動画内で必要となる「画像リクエスト」リストのJSONファイルをGeminiで生成します。 |
+| `coeroink` | 既存のキャラクター台本データ(`add_character.json`)を元に、COEIROINK用テキストが出力されます。 |
+| `gen-img-req` | 音声のメタデータ(`voice_data.json`)をもとに、画像リクエストJSONをGeminiで生成します。 |
 
 ## 📂 ディレクトリ構成 (Directory Structure)
 
