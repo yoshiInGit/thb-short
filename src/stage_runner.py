@@ -4,13 +4,14 @@ from stages.generate_script import make_script, add_character_script, output_coe
 from pipeline.video_pipeline import gen_img_request_pipeline
 from util.file_io import load_json, save_json
 from config import (
-    MAKE_SCRIPT_JSON, ADD_CHARACTER_JSON, COEROINK_JSON, TRIVIA_INPUT_PATH
+    MAKE_SCRIPT_JSON, ADD_CHARACTER_JSON, COEROINK_JSON, TRIVIA_INPUT_PATH,
+    IMG_REQUEST_JSON, SLIDE_IMGS_JSON
 )
 
 def _parse_args():
     """コマンドライン引数の解析"""
     parser = argparse.ArgumentParser(description="THB Short 各工程（ステージ）単独実行ツール")
-    parser.add_argument("stage", choices=["make-script", "add-char", "coeroink", "gen-img-req"], help="実行するステージ")
+    parser.add_argument("stage", choices=["make-script", "add-char", "coeroink", "gen-img-req", "fetch-images"], help="実行するステージ")
     
     return parser.parse_args(), parser
 
@@ -39,6 +40,12 @@ def main():
 
         case "gen-img-req":
             gen_img_request_pipeline()
+
+        case "fetch-images":
+            from stages.fetch_images import fetch_pixabay_images
+            img_req_data = load_json(IMG_REQUEST_JSON)
+            res = fetch_pixabay_images(img_req_data)
+            save_json(SLIDE_IMGS_JSON, res)
 
         case _:
             parser.print_help()

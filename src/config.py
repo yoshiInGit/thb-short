@@ -20,11 +20,16 @@ ADD_CHARACTER_JSON = os.path.join(INTERMEDIATE_DIR, "add_character.json")
 COEROINK_JSON = os.path.join(INTERMEDIATE_DIR, "coeroink.json")
 VOICE_DATA_JSON = os.path.join(INTERMEDIATE_DIR, "voice_data.json")
 IMG_REQUEST_JSON = os.path.join(INTERMEDIATE_DIR, "img_request.json")
+SLIDE_IMGS_JSON = os.path.join(INTERMEDIATE_DIR, "slide_imgs.json")
 
 # Final Outputs
 COEROINK_TXT = os.path.join(OUTPUT_DIR, "coeroink.txt")
 IMG_REQUEST_TXT = os.path.join(OUTPUT_DIR, "img_request.txt")
+SLIDE_IMGS_DIR = os.path.join(OUTPUT_DIR, "slide_imgs")
 OUTPUT_VOICE = os.path.join(OUTPUT_DIR, "voice.wav")
+
+# API Keys
+PIXABAY_API_KEY = os.getenv("PIXABAY_API_KEY", "DUMMY_KEY")
 
 # Dummy Data Directory (relative to src)
 DUMMY_DIR_NAME = "dummy"
