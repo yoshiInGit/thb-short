@@ -1,13 +1,12 @@
 import os
 import argparse
-from stages.generate_script import make_script, add_character_script, output_coeroink_txt, gen_script_pipeline
-from stages.generate_voice_data import generate_voice_data
-from stages.generate_video import generate_img_request, generate_subtitle
+from stages.generate_script import make_script, add_character_script, output_coeroink_txt
+from pipeline.script_pipeline import gen_script_pipeline
+from pipeline.subtitle_pipeline import gen_subtitle_pipeline
+from pipeline.video_pipeline import gen_img_request_pipeline
 from util.file_io import load_json, save_json
 from config import (
-    MAKE_SCRIPT_JSON, ADD_CHARACTER_JSON, COEROINK_JSON, 
-    VOICE_DATA_JSON, IMG_REQUEST_JSON, COEROINK_TXT,
-    OUTPUT_VOICE, OUTPUT_MP4, FPS, TRIVIA_INPUT_PATH
+    MAKE_SCRIPT_JSON, ADD_CHARACTER_JSON, COEROINK_JSON, TRIVIA_INPUT_PATH
 )
 
 
@@ -21,12 +20,12 @@ def _parse_args():
     script_parser.add_argument("step", choices=["all", "make-script", "add-char", "coeroink"], 
                               nargs='?', default="all", help="実行するステップ (default: all)")
 
-    # gen-voice コマンド
-    subparsers.add_parser("gen-voice", help="音声データとメタ情報の生成を実行します")
+    # gen-subtitle コマンド
+    subparsers.add_parser("gen-subtitle", help="音声データとメタ情報、字幕動画の生成を実行します")
 
     # gen-video コマンド
     video_parser = subparsers.add_parser("gen-video", help="動画生成に関連する操作")
-    video_parser.add_argument("step", choices=["gen-img-req", "gen-sub"], help="実行するステップ")
+    video_parser.add_argument("step", choices=["gen-img-req"], help="実行するステップ")
 
     return parser.parse_args(), parser
 
@@ -55,32 +54,15 @@ def _handle_gen_script(args):
             res = output_coeroink_txt(char_data.get("script", ""))
             save_json(COEROINK_JSON, res.model_dump())
 
-def _handle_gen_voice():
+def _handle_gen_subtitle():
     """音声データ生成の処理"""
-    combined_audio, words_data = generate_voice_data()
-
-    # 音声の保存
-    combined_audio.export(OUTPUT_VOICE, format="wav")
-    print(f"  -> Saved combined voice to {OUTPUT_VOICE}")
-
-    # メタデータの保存
-    save_json(VOICE_DATA_JSON, {"words": words_data})
+    gen_subtitle_pipeline()
 
 def _handle_gen_video(args):
     """動画生成に関連する操作の処理"""
     match args.step:
         case "gen-img-req":
-            voice_data = load_json(VOICE_DATA_JSON)
-            res = generate_img_request(voice_data)
-            save_json(IMG_REQUEST_JSON, res.model_dump())
-
-        case "gen-sub":
-            voice_data = load_json(VOICE_DATA_JSON)
-            video_clip = generate_subtitle(voice_data)
-            
-            print(f"Exporting video to {OUTPUT_MP4}...")
-            video_clip.write_videofile(OUTPUT_MP4, fps=FPS, codec="libx264", audio=False)
-            print("Export complete!")
+            gen_img_request_pipeline()
 
 
 def main():
@@ -90,8 +72,8 @@ def main():
         case "gen-script":
             _handle_gen_script(args)
             
-        case "gen-voice":
-            _handle_gen_voice()
+        case "gen-subtitle":
+            _handle_gen_subtitle()
             
         case "gen-video":
             _handle_gen_video(args)
