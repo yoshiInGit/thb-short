@@ -1,8 +1,8 @@
 import os
 import argparse
-from pipelines.generate_script import make_script, add_character_script, output_coeroink_txt, gen_script_pipeline
-from pipelines.generate_voice_data import generate_voice_data
-from pipelines.generate_video import generate_img_request, generate_subtitle
+from stages.generate_script import make_script, add_character_script, output_coeroink_txt, gen_script_pipeline
+from stages.generate_voice_data import generate_voice_data
+from stages.generate_video import generate_img_request, generate_subtitle
 from util.file_io import load_json, save_json
 from config import (
     MAKE_SCRIPT_JSON, ADD_CHARACTER_JSON, COEROINK_JSON, 
