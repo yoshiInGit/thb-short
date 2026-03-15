@@ -17,7 +17,7 @@
 | :----------------- | :------------------------------------------- |
 | **Language**       | Python 3.12 (slim)                           |
 | **AI Model**       | Gemini 2.0 Flash (`gemini-2.0-flash-exp` 等) |
-| **API Library**    | google-genai, pydantic                       |
+| **Libraries**      | google-genai, pydantic, python-dotenv, pydub, moviepy |
 | **Infrastructure** | Docker, Docker Compose                       |
 
 ## 🏁 はじめに (Getting Started)
@@ -67,16 +67,53 @@ python src/main.py
 ```text
 .
 ├── src/
-│   ├── main.py          # 実行エントリーポイント（パイプライン制御）
-│   ├── generator.py     # Gemini API を用いた生成ロジック
-│   ├── models.py        # Pydantic によるデータ構造定義
-│   ├── input/           # 入力データ
-│   │   └── trivia.txt   # 元ネタとなる雑学テキスト
-│   └── output/          # 出力データ
-│       ├── coeroink.txt  # 読み上げ用テキスト
-│       └── img_request.txt # 画像リスト
+│   ├── main.py          # 実行エントリーポイント (CLI、各パイプラインの呼び出し)
+│   ├── config.py        # パスやモデル設定などの全体定数
+│   ├── pipeline/        # 一連の自動化フロー（オーケストレーション）
+│   ├── stages/          # アトミックな各処理の実行単位（API通信、動画編集など）
+│   ├── util/            # アプリ内共通機能（ロギング、ファイルIO、Geminiクライアント）
+│   ├── model/           # Pydantic によるデータ構造定義 (レスポンス型など)
+│   ├── data/            # 入力データおよび出力結果
+│   ├── logs/            # Gemini API呼び出し時のプロンプトとレスポンスのログ
+│   └── prompts/         # Gemini用プロンプトのテンプレート
 ├── Dockerfile           # Python環境定義
 ├── docker-compose.yml   # 開発環境設定
 ├── requirements.txt     # Python依存パッケージ
-└── .env                 # 環境変数（Git非推奨）
+└── .env                 # 環境変数
 ```
+
+### コンポーネント間の依存関係
+
+プロジェクトの各ディレクトリ・モジュールは、責務ごとに明確に分離されており、以下のような依存関係を持っています。
+
+```mermaid
+graph TD
+    classDef main fill:#ffbfbf,stroke:#333,stroke-width:1px,color:#000
+    classDef pipeline fill:#fff0bf,stroke:#333,stroke-width:1px,color:#000
+    classDef stages fill:#bfffbf,stroke:#333,stroke-width:1px,color:#000
+    classDef util fill:#bfefff,stroke:#333,stroke-width:1px,color:#000
+    classDef model fill:#dfbfff,stroke:#333,stroke-width:1px,color:#000
+
+    Main[src/main.py]:::main --> Pipeline[src/pipeline/]:::pipeline
+    Pipeline --> Stages[src/stages/]:::stages
+    Pipeline --> Util[src/util/]:::util
+    Stages --> Model[src/model/]:::model
+    Stages --> Util
+```
+
+1.  **`src/main.py` (CLI / Entrypoint)**
+    *   **役割**: ユーザーからのコマンド入力(`gen-script`, `gen-subtitle`等)を受け取り、適切なパイプラインを実行します。
+    *   **依存**: `src/pipeline/` (実行フローの呼び出し)
+2.  **`src/pipeline/` (Orchestration)**
+    *   **役割**: 複数の処理(Stage)をつなぎ合わせ、I/Oを含めた一連の作業フローを定義します。
+    *   **依存**: `src/stages/` (アトミックな処理), `src/util/` (ファイル保存等)
+3.  **`src/stages/` (Processing Functions)**
+    *   **役割**: Gemini APIによるテキスト生成や、MoviePyを用いた動画編集などのアトミックな機能を提供します。
+    *   **依存**: `src/model/` (型定義), `src/util/` (APIクライアント等)
+    *   **外部依存**: `moviepy`, `pydub`
+4.  **`src/util/` (Utilities)**
+    *   **役割**: プロジェクト全体で使い回す汎用的な処理（APIクライアント初期化、ロギング、JSONの読み書き）をまとめます。
+    *   **外部依存**: `google-genai` (Gemini API呼び出し), `python-dotenv` (環境変数展開)
+5.  **`src/model/` (Data Models)**
+    *   **役割**: APIの構造化出力や内部でやり取りするデータのスキーマを定義します。
+    *   **外部依存**: `pydantic`
