@@ -1,25 +1,24 @@
 import os
 import argparse
-from gen_script import make_script, add_character_script, output_coeroink_txt
-from generate_voice_data import generate_voice_data
-from generate_video import generate_img_request, generate_subtitle
-from utils import load_json, save_json
+from pipelines.generate_script import make_script, add_character_script, output_coeroink_txt
+from pipelines.generate_voice_data import generate_voice_data
+from pipelines.generate_video import generate_img_request, generate_subtitle
+from util.file_io import load_json, save_json
 from config import (
     MAKE_SCRIPT_JSON, ADD_CHARACTER_JSON, COEROINK_JSON, 
     VOICE_DATA_JSON, IMG_REQUEST_JSON, COEROINK_TXT,
-    OUTPUT_VOICE, OUTPUT_MP4, FPS
+    OUTPUT_VOICE, OUTPUT_MP4, FPS, TRIVIA_INPUT_PATH
 )
 
 def gen_script_pipeline():
     """スクリプト生成パイプラインの実行"""
     print("Starting automatic script generation pipeline...")
     
-    input_path = "input/trivia.txt"
-    if not os.path.exists(input_path):
-        print(f"Error: Input file {input_path} not found.")
+    if not os.path.exists(TRIVIA_INPUT_PATH):
+        print(f"Error: Input file {TRIVIA_INPUT_PATH} not found.")
         return
         
-    with open(input_path, "r", encoding="utf-8") as f:
+    with open(TRIVIA_INPUT_PATH, "r", encoding="utf-8") as f:
         trivia_text = f.read()
         
     try:
@@ -72,8 +71,10 @@ def _handle_gen_script(args):
             gen_script_pipeline()
 
         case "make-script":
-            input_path = "input/trivia.txt"
-            with open(input_path, "r", encoding="utf-8") as f:
+            if not os.path.exists(TRIVIA_INPUT_PATH):
+                print(f"Error: Input file {TRIVIA_INPUT_PATH} not found.")
+                return
+            with open(TRIVIA_INPUT_PATH, "r", encoding="utf-8") as f:
                 trivia_text = f.read()
             res = make_script(trivia_text)
             save_json(MAKE_SCRIPT_JSON, res.model_dump())

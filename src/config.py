@@ -1,13 +1,19 @@
 import os
 
 # ===== Directory Settings =====
-OUTPUT_DIR = "output"
+# src/ ディレクトリの絶対パスを取得
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+DATA_DIR = os.path.join(BASE_DIR, "data")
+INPUT_DIR = os.path.join(DATA_DIR, "input")
+OUTPUT_DIR = os.path.join(DATA_DIR, "output")
 INTERMEDIATE_DIR = os.path.join(OUTPUT_DIR, "intermediate")
-LOG_DIR = "logs"
-PROMPT_DIR = "prompts"
-VOICE_DIR = "input/voice"
+LOG_DIR = os.path.join(BASE_DIR, "logs")
+PROMPT_DIR = os.path.join(BASE_DIR, "prompts")
+VOICE_DIR = os.path.join(INPUT_DIR, "voice")
 
 # ===== File Paths =====
+TRIVIA_INPUT_PATH = os.path.join(INPUT_DIR, "trivia.txt")
 # Intermediate Data
 MAKE_SCRIPT_JSON = os.path.join(INTERMEDIATE_DIR, "make_script.json")
 ADD_CHARACTER_JSON = os.path.join(INTERMEDIATE_DIR, "add_character.json")

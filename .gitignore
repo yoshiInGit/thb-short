@@ -1,7 +1,6 @@
 src/prompts/
 .env
-logs/
-src/output/
-src/input/
+src/logs/
+src/data/
 src/__pycache__/
 *.pyc

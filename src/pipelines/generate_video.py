@@ -1,8 +1,9 @@
 import os
 import json
 from moviepy import TextClip, ColorClip, CompositeVideoClip
-from models import ImgRequestResponse
-from utils import load_prompt, generate_structured_content
+from model.video import ImgRequestResponse
+from util.prompt import load_prompt
+from util.gemini import generate_structured_content
 from config import DEFAULT_MODEL, DEFAULT_TEMPERATURE, RESOLUTION, BG_COLOR, FONT_SIZE, FONT_COLOR, STROKE_COLOR, STROKE_WIDTH, FONT_NAME, TEXT_POS
 
 def generate_img_request(voice_data: dict) -> ImgRequestResponse:

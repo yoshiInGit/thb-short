@@ -1,5 +1,6 @@
-from models import MakeScriptResponse, AddCharacterScriptResponse, OutputCoeroinkTxtResponse
-from utils import load_prompt, generate_structured_content
+from model.script import MakeScriptResponse, AddCharacterScriptResponse, OutputCoeroinkTxtResponse
+from util.prompt import load_prompt
+from util.gemini import generate_structured_content
 from config import DEFAULT_MODEL, DEFAULT_TEMPERATURE, COEROINK_TEMPERATURE
 
 # ===== Processing Functions =====
