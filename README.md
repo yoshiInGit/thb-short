@@ -13,12 +13,12 @@
 
 ## 🛠 使用技術 (Tech Stack)
 
-| カテゴリ           | 技術                                         |
-| :----------------- | :------------------------------------------- |
-| **Language**       | Python 3.12 (slim)                           |
-| **AI Model**       | Gemini 2.0 Flash (`gemini-2.0-flash-exp` 等) |
+| カテゴリ           | 技術                                                  |
+| :----------------- | :---------------------------------------------------- |
+| **Language**       | Python 3.12 (slim)                                    |
+| **AI Model**       | Gemini 2.0 Flash (`gemini-2.0-flash-exp` 等)          |
 | **Libraries**      | google-genai, pydantic, python-dotenv, pydub, moviepy |
-| **Infrastructure** | Docker, Docker Compose                       |
+| **Infrastructure** | Docker, Docker Compose                                |
 
 ## 🏁 はじめに (Getting Started)
 
@@ -66,15 +66,14 @@ python src/main.py [コマンド]
 
 本ツールは複数の工程に分かれたコマンドライン・インターフェースを提供しています。目的に応じて以下のコマンドを使用してください。
 
-| コマンド | 引数 (オプション) | 説明 |
-| :--- | :--- | :--- |
-| `gen-script` | `all` (デフォルト) | 雑学テキストの読み込みから、ベース台本生成、キャラクター口調変換、COEIROINK形式出力までの全ステップを連続で実行します。 |
-| | `make-script` | 入力テキストからベースとなる台本のみを生成します。 |
-| | `add-char` | 既存の台本データを元に、キャラクター口調の台本のみに変換します。 |
-| | `coeroink` | 既存のキャラクター台本データを元に、COEIROINK用テキストのみを出力します。 |
-| `gen-subtitle` | (なし) | 用意された音声ファイル(`src/data/input/voice/`)をもとに、結合音声とタイミングメタデータを生成し、さらにそのデータを使った字幕動画(`subtitle.mp4`)を一気に生成します。 |
-| `gen-video` | `gen-img-req` | 音声のメタデータをもとに、動画内で必要となる「画像リクエスト」のリストをGeminiで生成します。 |
-
+| コマンド       | 引数 (オプション)  | 説明                                                                                                                                                                  |
+| :------------- | :----------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `gen-script`   | `all` (デフォルト) | 雑学テキストの読み込みから、ベース台本生成、キャラクター口調変換、COEIROINK形式出力までの全ステップを連続で実行します。                                               |
+|                | `make-script`      | 入力テキストからベースとなる台本のみを生成します。                                                                                                                    |
+|                | `add-char`         | 既存の台本データを元に、キャラクター口調の台本のみに変換します。                                                                                                      |
+|                | `coeroink`         | 既存のキャラクター台本データを元に、COEIROINK用テキストのみを出力します。                                                                                             |
+| `gen-subtitle` | (なし)             | 用意された音声ファイル(`src/data/input/voice/`)をもとに、結合音声とタイミングメタデータを生成し、さらにそのデータを使った字幕動画(`subtitle.mp4`)を一気に生成します。 |
+| `gen-video`    | `gen-img-req`      | 音声のメタデータをもとに、動画内で必要となる「画像リクエスト」のリストをGeminiで生成します。                                                                          |
 
 ## 📂 ディレクトリ構成 (Directory Structure)
 
@@ -105,29 +104,26 @@ graph TD
     classDef main fill:#ffbfbf,stroke:#333,stroke-width:1px,color:#000
     classDef pipeline fill:#fff0bf,stroke:#333,stroke-width:1px,color:#000
     classDef stages fill:#bfffbf,stroke:#333,stroke-width:1px,color:#000
-    classDef util fill:#bfefff,stroke:#333,stroke-width:1px,color:#000
     classDef model fill:#dfbfff,stroke:#333,stroke-width:1px,color:#000
 
     Main[src/main.py]:::main --> Pipeline[src/pipeline/]:::pipeline
     Pipeline --> Stages[src/stages/]:::stages
-    Pipeline --> Util[src/util/]:::util
     Stages --> Model[src/model/]:::model
-    Stages --> Util
 ```
 
 1.  **`src/main.py` (CLI / Entrypoint)**
-    *   **役割**: ユーザーからのコマンド入力(`gen-script`, `gen-subtitle`等)を受け取り、適切なパイプラインを実行します。
-    *   **依存**: `src/pipeline/` (実行フローの呼び出し)
+    - **役割**: ユーザーからのコマンド入力(`gen-script`, `gen-subtitle`等)を受け取り、適切なパイプラインを実行します。
+    - **依存**: `src/pipeline/` (実行フローの呼び出し)
 2.  **`src/pipeline/` (Orchestration)**
-    *   **役割**: 複数の処理(Stage)をつなぎ合わせ、I/Oを含めた一連の作業フローを定義します。
-    *   **依存**: `src/stages/` (アトミックな処理), `src/util/` (ファイル保存等)
+    - **役割**: 複数の処理(Stage)をつなぎ合わせ、I/Oを含めた一連の作業フローを定義します。
+    - **依存**: `src/stages/` (アトミックな処理), `src/util/` (ファイル保存等)
 3.  **`src/stages/` (Processing Functions)**
-    *   **役割**: Gemini APIによるテキスト生成や、MoviePyを用いた動画編集などのアトミックな機能を提供します。
-    *   **依存**: `src/model/` (型定義), `src/util/` (APIクライアント等)
-    *   **外部依存**: `moviepy`, `pydub`
+    - **役割**: Gemini APIによるテキスト生成や、MoviePyを用いた動画編集などのアトミックな機能を提供します。
+    - **依存**: `src/model/` (型定義), `src/util/` (APIクライアント等)
+    - **外部依存**: `moviepy`, `pydub`
 4.  **`src/util/` (Utilities)**
-    *   **役割**: プロジェクト全体で使い回す汎用的な処理（APIクライアント初期化、ロギング、JSONの読み書き）をまとめます。
-    *   **外部依存**: `google-genai` (Gemini API呼び出し), `python-dotenv` (環境変数展開)
+    - **役割**: プロジェクト全体で使い回す汎用的な処理（APIクライアント初期化、ロギング、JSONの読み書き）をまとめます。
+    - **外部依存**: `google-genai` (Gemini API呼び出し), `python-dotenv` (環境変数展開)
 5.  **`src/model/` (Data Models)**
-    *   **役割**: APIの構造化出力や内部でやり取りするデータのスキーマを定義します。
-    *   **外部依存**: `pydantic`
+    - **役割**: APIの構造化出力や内部でやり取りするデータのスキーマを定義します。
+    - **外部依存**: `pydantic`
