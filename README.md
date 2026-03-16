@@ -32,14 +32,19 @@
 ### セットアップ (Installation)
 
 1.  **環境変数の設定**:
-    プロジェクトルートに `.env` ファイルを作成し、APIキーを設定してください。
+    プロジェクトルートに `.env` ファイルを作成し、必要なAPIキーを設定してください。
 
     ```text
-    GEMINI_API_KEY=your_api_key_here
+    GEMINI_API_KEY=your_gemini_api_key
+    PIXABAY_API_KEY=your_pixabay_api_key  # 画像取得機能を使用する場合に必要
+    USE_DUMMY_GEMINI=false               # テスト用にダミーデータを使用する場合は true
     ```
 
-2.  **入力データの準備**:
-    `src/input/trivia.txt` に、台本の元となる雑学テキストを記入します。
+2.  **必要なディレクトリとファイルの準備**:
+    以下のディレクトリやファイルは `.gitignore` で除外されていますが、プロジェクトの実行に必要です。
+    - **プロンプトテンプレート**: `src/prompts/` ディレクトリを作成し、必要なプロンプトファイル（`make_script.txt` 等）を配置してください。
+    - **入力データ**: `src/data/input/trivia.txt` に、台本の元となる雑学テキストを記入します。
+    - **出力・ログ用**: `src/data/output/` および `src/logs/` ディレクトリは実行時に自動生成または使用されます。
 
 ## 📖 使い方 (Usage)
 
@@ -53,8 +58,8 @@ docker-compose up --build
 
 実行後、以下のファイルが生成されます：
 
-- `src/output/coeroink.txt`: 改行済み台本テキスト
-- `src/output/img_request.txt`: 必要な画像リスト
+- `src/data/output/coeroink.txt`: 改行済み台本テキスト
+- `src/data/output/img_request.txt`: 必要な画像リスト
 
 ### コンテナ内での操作
 
@@ -68,9 +73,9 @@ python src/main.py [コマンド]
 
 一連の自動化フロー（パイプライン）を実行するためのメインスクリプトです。
 
-| コマンド       | 説明                                                                                                                                                                  |
-| :------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `gen-script`        | 雑学テキストの読み込みから、ベース台本生成、キャラクター口調変換、COEIROINK形式出力までの全ステップを連続で実行します。                                               |
+| コマンド            | 説明                                                                                                                             |
+| :------------------ | :------------------------------------------------------------------------------------------------------------------------------- |
+| `gen-script`        | 雑学テキストの読み込みから、ベース台本生成、キャラクター口調変換、COEIROINK形式出力までの全ステップを連続で実行します。          |
 | `gen-video-footage` | 音声データ生成、字幕動画作成、画像リクエスト生成、画像取得、スライドショー生成までの一連の動画素材作成パイプラインを実行します。 |
 
 ### 個別ステージ実行 (`src/stage_runner.py`)
@@ -88,14 +93,14 @@ python src/stage_runner.py fetch-images
 python src/stage_runner.py gen-slideshow
 ```
 
-| 引数 (ステージ) | 説明 |
-| :--- | :--- |
-| `make-script`   | 入力テキスト(`src/data/input/trivia.txt`)からベースとなる台本(`make_script.json`)のみを生成します。 |
-| `add-char`     | 既存の台本データ(`make_script.json`)を元に、キャラクター口調の台本(`add_character.json`)のみに変換します。 |
-| `coeroink`     | 既存のキャラクター台本データ(`add_character.json`)を元に、COEIROINK用テキストが出力されます。 |
-| `gen-img-req`  | 音声のメタデータ(`voice_data.json`)をもとに、画像リクエストJSONをGeminiで生成します。 |
-| `fetch-images` | 画像リクエスト(`img_request.json`)をもとに、Pixabayから画像をダウンロードし、画像リスト(`slide_imgs.json`)を生成します。 |
-| `gen-slideshow`| 画像リスト(`slide_imgs.json`)をもとに、スライドショー動画(`slides.mp4`)を生成します。 |
+| 引数 (ステージ) | 説明                                                                                                                     |
+| :-------------- | :----------------------------------------------------------------------------------------------------------------------- |
+| `make-script`   | 入力テキスト(`src/data/input/trivia.txt`)からベースとなる台本(`make_script.json`)のみを生成します。                      |
+| `add-char`      | 既存の台本データ(`make_script.json`)を元に、キャラクター口調の台本(`add_character.json`)のみに変換します。               |
+| `coeroink`      | 既存のキャラクター台本データ(`add_character.json`)を元に、COEIROINK用テキストが出力されます。                            |
+| `gen-img-req`   | 音声のメタデータ(`voice_data.json`)をもとに、画像リクエストJSONをGeminiで生成します。                                    |
+| `fetch-images`  | 画像リクエスト(`img_request.json`)をもとに、Pixabayから画像をダウンロードし、画像リスト(`slide_imgs.json`)を生成します。 |
+| `gen-slideshow` | 画像リスト(`slide_imgs.json`)をもとに、スライドショー動画(`slides.mp4`)を生成します。                                    |
 
 ## 📂 ディレクトリ構成 (Directory Structure)
 
