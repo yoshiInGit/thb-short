@@ -6,7 +6,7 @@ from pipeline.video_pipeline import gen_img_request_pipeline
 from util.file_io import load_json, save_json
 from config import (
     MAKE_SCRIPT_JSON, ADD_CHARACTER_JSON, COEROINK_JSON, TRIVIA_INPUT_PATH,
-    IMG_REQUEST_JSON, SLIDE_IMGS_JSON
+    IMG_REQUEST_JSON, SLIDE_IMGS_JSON, SLIDESHOW_OUTPUT_MP4, FPS
 )
 
 def _parse_args():
@@ -50,7 +50,11 @@ def main():
 
         case "gen-slideshow":
             slide_imgs_data = load_json(SLIDE_IMGS_JSON)
-            generate_slideshow(slide_imgs_data)
+            slides_clip = generate_slideshow(slide_imgs_data)
+            if slides_clip:
+                print(f"Writing slideshow to {SLIDESHOW_OUTPUT_MP4}...")
+                slides_clip.write_videofile(SLIDESHOW_OUTPUT_MP4, fps=FPS, codec="libx264")
+                print("Slideshow generation completed.")
 
         case _:
             parser.print_help()

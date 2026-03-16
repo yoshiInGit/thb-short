@@ -62,7 +62,7 @@ def _create_slide_clip(slide: SlideItem) -> ImageClip | None:
     # 開始時間設定
     return clip.with_start(time_start_s)
 
-def generate_slideshow(slide_imgs_data: dict):
+def generate_slideshow(slide_imgs_data: dict) -> CompositeVideoClip | None:
     """
     slide_imgs.json のデータに基づいてスライドショー動画を生成する
     """
@@ -79,12 +79,9 @@ def generate_slideshow(slide_imgs_data: dict):
 
     if not clips:
         print("Error: No valid clips generated.")
-        return
+        return None
 
     # 全てのクリップを合成
     video = CompositeVideoClip(clips, size=SLIDESHOW_RESOLUTION)
     
-    # 書き出し
-    print(f"Writing slideshow to {SLIDESHOW_OUTPUT_MP4}...")
-    video.write_videofile(SLIDESHOW_OUTPUT_MP4, fps=FPS, codec="libx264")
-    print("Slideshow generation completed.")
+    return video

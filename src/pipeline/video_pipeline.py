@@ -54,6 +54,10 @@ def gen_video_footage():
 
     # 5. スライドショー生成
     print("\n--- Stage 5: Generate Slideshow ---")
-    generate_slideshow(slide_imgs_data)
+    slides_clip = generate_slideshow(slide_imgs_data)
+    if slides_clip:
+        print(f"Writing slideshow to {SLIDESHOW_OUTPUT_MP4}...")
+        slides_clip.write_videofile(SLIDESHOW_OUTPUT_MP4, fps=FPS, codec="libx264")
+        print("Slideshow generation completed.")
 
     print("\nVideo footage generation pipeline finished successfully!")
