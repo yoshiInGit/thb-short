@@ -9,7 +9,9 @@
 1.  **台本生成 (make_script)**: 雑学テキストから動画用のタイトルと基本台本を生成します。
 2.  **キャラクター変換 (add_character_script)**: 台本を指定のキャラクター口調（例：ずんだもん）に変換します。
 3.  **COEIROINK形式出力 (output_coeroink_txt)**: 音声合成ソフトでの読み上げ用に、文節ごとに改行を入れたテキストファイルを出力します。
-4.  **画像リクエスト作成 (output_img_request)**: 台本内容に基づき、動画編集で必要となる画像のリストを書き出します。
+4.  **画像リクエスト作成 (generate_img_request)**: 台本内容に基づき、動画編集で必要となる画像のリストを書き出します。
+5.  **画像取得 (fetch_images)**: 画像リクエストに基づき、Pixabay 等から素材画像を自動取得します。
+6.  **スライドショー生成 (generate_slideshow)**: 取得した画像と音声タイミングを合わせ、フェード効果付きのスライドショー動画を生成します。
 
 ## 🛠 使用技術 (Tech Stack)
 
@@ -68,8 +70,8 @@ python src/main.py [コマンド]
 
 | コマンド       | 説明                                                                                                                                                                  |
 | :------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `gen-script`   | 雑学テキストの読み込みから、ベース台本生成、キャラクター口調変換、COEIROINK形式出力までの全ステップを連続で実行します。                                               |
-| `gen-subtitle` | 用意された音声ファイル(`src/data/input/voice/`)をもとに、結合音声とタイミングメタデータを生成し、さらにそのデータを使った字幕動画(`subtitle.mp4`)を一気に生成します。 |
+| `gen-script`        | 雑学テキストの読み込みから、ベース台本生成、キャラクター口調変換、COEIROINK形式出力までの全ステップを連続で実行します。                                               |
+| `gen-video-footage` | 音声データ生成、字幕動画作成、画像リクエスト生成、画像取得、スライドショー生成までの一連の動画素材作成パイプラインを実行します。 |
 
 ### 個別ステージ実行 (`src/stage_runner.py`)
 
@@ -79,16 +81,21 @@ python src/main.py [コマンド]
 # 台本作成のみ実行
 python src/stage_runner.py make-script
 
-# 画像生成リクエストのみ実行
-python src/stage_runner.py gen-img-req
+# 画像取得のみ実行
+python src/stage_runner.py fetch-images
+
+# スライドショー生成のみ実行
+python src/stage_runner.py gen-slideshow
 ```
 
 | 引数 (ステージ) | 説明 |
 | :--- | :--- |
-| `make-script` | 入力テキスト(`src/data/input/trivia.txt`)からベースとなる台本(`make_script.json`)のみを生成します。 |
-| `add-char` | 既存の台本データ(`make_script.json`)を元に、キャラクター口調の台本(`add_character.json`)のみに変換します。 |
-| `coeroink` | 既存のキャラクター台本データ(`add_character.json`)を元に、COEIROINK用テキストが出力されます。 |
-| `gen-img-req` | 音声のメタデータ(`voice_data.json`)をもとに、画像リクエストJSONをGeminiで生成します。 |
+| `make-script`   | 入力テキスト(`src/data/input/trivia.txt`)からベースとなる台本(`make_script.json`)のみを生成します。 |
+| `add-char`     | 既存の台本データ(`make_script.json`)を元に、キャラクター口調の台本(`add_character.json`)のみに変換します。 |
+| `coeroink`     | 既存のキャラクター台本データ(`add_character.json`)を元に、COEIROINK用テキストが出力されます。 |
+| `gen-img-req`  | 音声のメタデータ(`voice_data.json`)をもとに、画像リクエストJSONをGeminiで生成します。 |
+| `fetch-images` | 画像リクエスト(`img_request.json`)をもとに、Pixabayから画像をダウンロードし、画像リスト(`slide_imgs.json`)を生成します。 |
+| `gen-slideshow`| 画像リスト(`slide_imgs.json`)をもとに、スライドショー動画(`slides.mp4`)を生成します。 |
 
 ## 📂 ディレクトリ構成 (Directory Structure)
 
