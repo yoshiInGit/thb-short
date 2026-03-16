@@ -1,72 +1,85 @@
 import os
-import json
 from moviepy import ImageClip, CompositeVideoClip, vfx
+from model.video import SlideImgsResponse, SlideItem
 from config import (
     SLIDESHOW_RESOLUTION, SLIDESHOW_OUTPUT_MP4, SLIDESHOW_FADE_DURATION,
     SLIDE_IMGS_DIR, FPS
 )
 
+def _apply_cover_layout(clip: ImageClip, target_size: tuple[int, int]) -> ImageClip:
+    """
+    アスペクト比を維持しつつ、指定されたサイズを完全に覆うようにリサイズし、中央でクロップする
+    """
+    target_w, target_h = target_size
+    img_w, img_h = clip.size
+    
+    aspect_ratio_img = img_w / img_h
+    aspect_ratio_target = target_w / target_h
+
+    if aspect_ratio_img > aspect_ratio_target:
+        # 画像の方が横長い -> 高さをターゲットに合わせる
+        clip = clip.resized(height=target_h)
+    else:
+        # 画像の方が縦長い（または同じ） -> 幅をターゲットに合わせる
+        clip = clip.resized(width=target_w)
+
+    # 中央でクロップ
+    return clip.cropped(
+        x_center=clip.w / 2,
+        y_center=clip.h / 2,
+        width=target_w,
+        height=target_h
+    )
+
+def _create_slide_clip(slide: SlideItem) -> ImageClip | None:
+    """
+    個別のスライド項目から MoviePy のクリップを生成する
+    """
+    time_start_s = float(slide.time_start) / 1000.0
+    time_end_s = float(slide.time_end) / 1000.0
+    duration = time_end_s - time_start_s
+
+    if duration <= 0:
+        return None
+
+    img_path = os.path.join(SLIDE_IMGS_DIR, slide.img_path)
+    if not os.path.exists(img_path):
+        print(f"Warning: Image not found at {img_path}")
+        return None
+
+    # クリップ生成
+    clip = ImageClip(img_path).with_duration(duration)
+    
+    # レイアウト適用 (Cover Crop)
+    clip = _apply_cover_layout(clip, SLIDESHOW_RESOLUTION)
+
+    # エフェクト適用 (MoviePy 2.0)
+    clip = clip.with_effects([
+        vfx.FadeIn(SLIDESHOW_FADE_DURATION),
+        vfx.FadeOut(SLIDESHOW_FADE_DURATION)
+    ])
+    
+    # 開始時間設定
+    return clip.with_start(time_start_s)
+
 def generate_slideshow(slide_imgs_data: dict):
     """
-    slide_imgs.json のデータに基づいてスライドショー動画を生成する (MoviePy 2.0 準拠)
+    slide_imgs.json のデータに基づいてスライドショー動画を生成する
     """
-    print("Running generate_slideshow (MoviePy 2.0)...")
+    print("Running generate_slideshow (Refactored)...")
     
-    slides = slide_imgs_data.get("slide_imgs", [])
-    if not slides:
-        raise ValueError("No slide images data found.")
-
+    # Pydantic モデルによるパースとバリデーション
+    response = SlideImgsResponse(**slide_imgs_data)
+    
     clips = []
-    w, h = SLIDESHOW_RESOLUTION
+    for slide in response.slide_imgs:
+        clip = _create_slide_clip(slide)
+        if clip:
+            clips.append(clip)
 
-    for i, slide in enumerate(slides):
-        img_filename = slide.get("img_path")
-        time_start = float(slide.get("time_start")) / 1000.0
-        time_end = float(slide.get("time_end")) / 1000.0
-        duration = time_end - time_start
-
-        if duration <= 0:
-            continue
-
-        img_path = os.path.join(SLIDE_IMGS_DIR, img_filename)
-        if not os.path.exists(img_path):
-            print(f"Warning: Image not found at {img_path}")
-            continue
-
-        # 画像を読み込み
-        clip = ImageClip(img_path).with_duration(duration)
-
-        # アスペクト比を維持してリサイズし、中央でクロップ（cover効果）
-        img_w, img_h = clip.size
-        aspect_ratio_img = img_w / img_h
-        aspect_ratio_target = w / h
-
-        if aspect_ratio_img > aspect_ratio_target:
-            # 画像の方が横長い -> 高さをターゲットに合わせる
-            new_h = h
-            clip = clip.resized(height=new_h)
-        else:
-            # 画像の方が縦長い（または同じ） -> 幅をターゲットに合わせる
-            new_w = w
-            clip = clip.resized(width=new_w)
-
-        # 中央でクロップ
-        clip = clip.cropped(
-            x_center=clip.w / 2,
-            y_center=clip.h / 2,
-            width=w,
-            height=h
-        )
-
-        # フェード効果の適用 (MoviePy 2.0 では with_effects を推奨)
-        clip = clip.with_effects([
-            vfx.FadeIn(SLIDESHOW_FADE_DURATION),
-            vfx.FadeOut(SLIDESHOW_FADE_DURATION)
-        ])
-        
-        # 開始時間を設定
-        clip = clip.with_start(time_start)
-        clips.append(clip)
+    if not clips:
+        print("Error: No valid clips generated.")
+        return
 
     # 全てのクリップを合成
     video = CompositeVideoClip(clips, size=SLIDESHOW_RESOLUTION)

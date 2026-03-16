@@ -8,3 +8,12 @@ class ImgRequestItem(BaseModel):
 class ImgRequestResponse(BaseModel):
     thinking: str = Field(description="思考過程")
     img_request: list[ImgRequestItem] = Field(description="画像リスト")
+
+class SlideItem(BaseModel):
+    time_start: int = Field(description="開始時間(ms)")
+    time_end: int = Field(description="終了時間(ms)")
+    img_path: str = Field(description="画像ファイル名")
+    query: str = Field(description="検索クエリ", default="")
+
+class SlideImgsResponse(BaseModel):
+    slide_imgs: list[SlideItem] = Field(description="スライド画像リスト")
