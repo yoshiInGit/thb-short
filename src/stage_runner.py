@@ -1,6 +1,7 @@
 import os
 import argparse
 from stages.generate_script import make_script, add_character_script, output_coeroink_txt
+from stages.generate_slideshow import generate_slideshow
 from pipeline.video_pipeline import gen_img_request_pipeline
 from util.file_io import load_json, save_json
 from config import (
@@ -11,7 +12,7 @@ from config import (
 def _parse_args():
     """コマンドライン引数の解析"""
     parser = argparse.ArgumentParser(description="THB Short 各工程（ステージ）単独実行ツール")
-    parser.add_argument("stage", choices=["make-script", "add-char", "coeroink", "gen-img-req", "fetch-images"], help="実行するステージ")
+    parser.add_argument("stage", choices=["make-script", "add-char", "coeroink", "gen-img-req", "fetch-images", "gen-slideshow"], help="実行するステージ")
     
     return parser.parse_args(), parser
 
@@ -46,6 +47,10 @@ def main():
             img_req_data = load_json(IMG_REQUEST_JSON)
             res = fetch_pixabay_images(img_req_data)
             save_json(SLIDE_IMGS_JSON, res)
+
+        case "gen-slideshow":
+            slide_imgs_data = load_json(SLIDE_IMGS_JSON)
+            generate_slideshow(slide_imgs_data)
 
         case _:
             parser.print_help()

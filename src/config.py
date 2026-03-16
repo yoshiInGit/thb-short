@@ -44,6 +44,9 @@ RESOLUTION = (1080, 1920)
 BG_COLOR = (0, 255, 0) # Green back
 FPS = 24
 OUTPUT_MP4 = os.path.join(OUTPUT_DIR, "subtitle.mp4")
+SLIDESHOW_RESOLUTION = (1076, 692)
+SLIDESHOW_OUTPUT_MP4 = os.path.join(OUTPUT_DIR, "slides.mp4")
+SLIDESHOW_FADE_DURATION = 0.1
 
 # Text Configuration
 FONT_SIZE = 72
