@@ -1,4 +1,5 @@
 import os
+import numpy as np
 from moviepy import ImageClip, CompositeVideoClip, vfx
 from model.video import SlideImgsResponse, SlideItem
 from config import (
@@ -49,6 +50,11 @@ def _create_slide_clip(slide: SlideItem) -> ImageClip | None:
 
     # クリップ生成
     clip = ImageClip(img_path).with_duration(duration)
+    
+    # グレースケール画像 (H, W) の場合、(H, W, 3) に変換
+    # MoviePy 2.x のエフェクト(FadeIn等)でのブロードキャストエラー回避のため
+    if len(clip.img.shape) == 2:
+        clip.img = np.stack([clip.img] * 3, axis=-1)
     
     # レイアウト適用 (Cover Crop)
     clip = _apply_cover_layout(clip, SLIDESHOW_RESOLUTION)
