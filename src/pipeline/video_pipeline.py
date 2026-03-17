@@ -6,7 +6,7 @@ from stages.generate_slideshow import generate_slideshow
 from util.file_io import save_json
 from config import (
     VOICE_DATA_JSON, OUTPUT_VOICE, IMG_REQUEST_JSON, 
-    SLIDE_IMGS_JSON, OUTPUT_MP4, FPS
+    SLIDE_IMGS_JSON, OUTPUT_MP4, SLIDESHOW_OUTPUT_MP4, FPS
 )
 
 def gen_video_footage():
