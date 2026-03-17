@@ -3,18 +3,19 @@ import argparse
 from stages.generate_script import make_script, add_character_script, output_coeroink_txt
 from stages.generate_slideshow import generate_slideshow
 from stages.generate_video import generate_img_request
+from stages.generate_final_video import generate_final_video
 from stages.generate_voice_data import generate_voice_data
 from util.file_io import load_json, save_json
 from config import (
     MAKE_SCRIPT_JSON, ADD_CHARACTER_JSON, COEROINK_JSON, TRIVIA_INPUT_PATH,
     VOICE_DATA_JSON, IMG_REQUEST_JSON, SLIDE_IMGS_JSON, SLIDESHOW_OUTPUT_MP4, 
-    OUTPUT_VOICE, FPS
+    OUTPUT_VOICE, FINAL_VIDEO_OUTPUT_MP4, FPS
 )
 
 def _parse_args():
     """コマンドライン引数の解析"""
     parser = argparse.ArgumentParser(description="THB Short 各工程（ステージ）単独実行ツール")
-    parser.add_argument("stage", choices=["make-script", "add-char", "coeroink", "gen-voice", "gen-img-req", "fetch-images", "gen-slideshow"], help="実行するステージ")
+    parser.add_argument("stage", choices=["make-script", "add-char", "coeroink", "gen-voice", "gen-img-req", "fetch-images", "gen-slideshow", "gen-final-video"], help="実行するステージ")
     
     return parser.parse_args(), parser
 
@@ -65,6 +66,27 @@ def main():
                 print(f"Writing slideshow to {SLIDESHOW_OUTPUT_MP4}...")
                 slides_clip.write_videofile(SLIDESHOW_OUTPUT_MP4, fps=FPS, codec="libx264")
                 print("Slideshow generation completed.")
+
+        case "gen-final-video":
+            slide_imgs_data = load_json(SLIDE_IMGS_JSON)
+            voice_data = load_json(VOICE_DATA_JSON)
+            
+            # スライドショークリップの生成
+            slides_clip = generate_slideshow(slide_imgs_data)
+            if not slides_clip:
+                print("Error: Failed to generate slideshow clip.")
+                return
+
+            # 音声の読み込み
+            from moviepy import AudioFileClip
+            audio = AudioFileClip(OUTPUT_VOICE)
+
+            # 最終合成
+            final_video = generate_final_video(slides_clip, audio, voice_data)
+            if final_video:
+                print(f"Writing final video to {FINAL_VIDEO_OUTPUT_MP4}...")
+                final_video.write_videofile(FINAL_VIDEO_OUTPUT_MP4, fps=FPS, codec="libx264", audio_codec="aac")
+                print("Final video generation completed.")
 
         case _:
             parser.print_help()

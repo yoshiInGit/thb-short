@@ -47,6 +47,7 @@ OUTPUT_MP4 = os.path.join(OUTPUT_DIR, "subtitle.mp4")
 SLIDESHOW_RESOLUTION = (1076, 692)
 SLIDESHOW_OUTPUT_MP4 = os.path.join(OUTPUT_DIR, "slides.mp4")
 SLIDESHOW_FADE_DURATION = 0.3
+FINAL_VIDEO_OUTPUT_MP4 = os.path.join(OUTPUT_DIR, "final_video.mp4")
 
 # Text Configuration
 FONT_SIZE = 72
