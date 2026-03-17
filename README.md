@@ -86,6 +86,9 @@ python src/main.py [コマンド]
 # 台本作成のみ実行
 python src/stage_runner.py make-script
 
+# 音声生成のみ実行
+python src/stage_runner.py gen-voice
+
 # 画像取得のみ実行
 python src/stage_runner.py fetch-images
 
@@ -98,6 +101,7 @@ python src/stage_runner.py gen-slideshow
 | `make-script`   | 入力テキスト(`src/data/input/trivia.txt`)からベースとなる台本(`make_script.json`)のみを生成します。                      |
 | `add-char`      | 既存の台本データ(`make_script.json`)を元に、キャラクター口調の台本(`add_character.json`)のみに変換します。               |
 | `coeroink`      | 既存のキャラクター台本データ(`add_character.json`)を元に、COEIROINK用テキストが出力されます。                            |
+| `gen-voice`     | 録音済み音声ファイル(`src/data/input/voice/`)を結合し、音声(`voice.wav`)とメタデータ(`voice_data.json`)を生成します。   |
 | `gen-img-req`   | 音声のメタデータ(`voice_data.json`)をもとに、画像リクエストJSONをGeminiで生成します。                                    |
 | `fetch-images`  | 画像リクエスト(`img_request.json`)をもとに、Pixabayから画像をダウンロードし、画像リスト(`slide_imgs.json`)を生成します。 |
 | `gen-slideshow` | 画像リスト(`slide_imgs.json`)をもとに、スライドショー動画(`slides.mp4`)を生成します。                                    |
