@@ -51,9 +51,9 @@ FINAL_VIDEO_OUTPUT_MP4 = os.path.join(OUTPUT_DIR, "final_video.mp4")
 
 # Text Configuration
 FONT_SIZE = 72
-FONT_COLOR = "white"
-STROKE_COLOR = "black"
-STROKE_WIDTH = 3
+FONT_COLOR = "blue"
+STROKE_COLOR = "white"
+STROKE_WIDTH = 8
 FONT_NAME = "assets/font/LINESeedJP-Bold.ttf" 
 WRAP_WIDTH = 12  # 1行あたりの最大文字数
 TEXT_POS = ('center', 580)
