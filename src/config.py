@@ -40,8 +40,8 @@ DEFAULT_TEMPERATURE = 0.7
 COEROINK_TEMPERATURE = 0.2
 
 # ===== Subtitle Configurations =====
-RESOLUTION = (1080, 1920)
-BG_COLOR = (0, 255, 0) # Green back
+RESOLUTION = (1080, 330)
+BG_COLOR = (255, 255, 255) # White
 FPS = 24
 OUTPUT_MP4 = os.path.join(OUTPUT_DIR, "subtitle.mp4")
 SLIDESHOW_RESOLUTION = (1076, 692)
@@ -50,12 +50,13 @@ SLIDESHOW_FADE_DURATION = 0.3
 FINAL_VIDEO_OUTPUT_MP4 = os.path.join(OUTPUT_DIR, "final_video.mp4")
 
 # Text Configuration
-FONT_SIZE = 72
-FONT_COLOR = "blue"
-STROKE_COLOR = "white"
+FONT_SIZE = 42
+FONT_COLOR = "white"
+STROKE_COLOR = "black"
 STROKE_WIDTH = 8
 FONT_NAME = "assets/font/LINESeedJP-Bold.ttf" 
 WRAP_WIDTH = 12  # 1行あたりの最大文字数
-TEXT_POS = ('center', 580)
+TEXT_POS = (440, 'center')
+TEXT_MARGIN_RIGHT = 40  # 右端の余白
 TRANSITION_DURATION = 0.2  # フェードイン・アウトの時間(秒)
 SILENCE_DURATION_MS = 250  # 句読点後の無音時間

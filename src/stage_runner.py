@@ -2,20 +2,20 @@ import os
 import argparse
 from stages.generate_script import make_script, add_character_script, output_coeroink_txt
 from stages.generate_slideshow import generate_slideshow
-from stages.generate_video import generate_img_request
+from stages.generate_video import generate_img_request, generate_subtitle
 from stages.generate_final_video import generate_final_video
 from stages.generate_voice_data import generate_voice_data
 from util.file_io import load_json, save_json
 from config import (
     MAKE_SCRIPT_JSON, ADD_CHARACTER_JSON, COEROINK_JSON, TRIVIA_INPUT_PATH,
     VOICE_DATA_JSON, IMG_REQUEST_JSON, SLIDE_IMGS_JSON, SLIDESHOW_OUTPUT_MP4, 
-    OUTPUT_VOICE, FINAL_VIDEO_OUTPUT_MP4, FPS
+    OUTPUT_VOICE, FINAL_VIDEO_OUTPUT_MP4, OUTPUT_MP4, FPS
 )
 
 def _parse_args():
     """コマンドライン引数の解析"""
     parser = argparse.ArgumentParser(description="THB Short 各工程（ステージ）単独実行ツール")
-    parser.add_argument("stage", choices=["make-script", "add-char", "coeroink", "gen-voice", "gen-img-req", "fetch-images", "gen-slideshow", "gen-final-video"], help="実行するステージ")
+    parser.add_argument("stage", choices=["make-script", "add-char", "coeroink", "gen-voice", "gen-subtitle", "gen-img-req", "fetch-images", "gen-slideshow", "gen-final-video"], help="実行するステージ")
     
     return parser.parse_args(), parser
 
@@ -47,6 +47,13 @@ def main():
             combined_audio.export(OUTPUT_VOICE, format="wav")
             save_json(VOICE_DATA_JSON, {"words": words_data})
             print(f"  -> Saved voice data to {VOICE_DATA_JSON}")
+
+        case "gen-subtitle":
+            voice_data = load_json(VOICE_DATA_JSON)
+            print(f"Running gen-subtitle stage...")
+            subtitle_clip = generate_subtitle(voice_data)
+            subtitle_clip.write_videofile(OUTPUT_MP4, fps=FPS, codec="libx264")
+            print(f"  -> Saved subtitle video to {OUTPUT_MP4}")
 
         case "gen-img-req":
             voice_data = load_json(VOICE_DATA_JSON)
