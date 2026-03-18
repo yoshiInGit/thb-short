@@ -12,6 +12,7 @@
 4.  **画像リクエスト作成 (generate_img_request)**: 台本内容に基づき、動画編集で必要となる画像のリストを書き出します。
 5.  **画像取得 (fetch_images)**: 画像リクエストに基づき、Pixabay 等から素材画像を自動取得します。
 6.  **スライドショー生成 (generate_slideshow)**: 取得した画像と音声タイミングを合わせ、フェード効果付きのスライドショー動画を生成します。
+7.  **最終動画合成 (generate_final_video)**: スライドショー、音声、字幕（中央配置）を統合した完成版動画を生成します。
 
 ## 🛠 使用技術 (Tech Stack)
 
@@ -77,6 +78,7 @@ python src/main.py [コマンド]
 | :------------------ | :------------------------------------------------------------------------------------------------------------------------------- |
 | `gen-script`        | 雑学テキストの読み込みから、ベース台本生成、キャラクター口調変換、COEIROINK形式出力までの全ステップを連続で実行します。          |
 | `gen-video-footage` | 音声データ生成、字幕動画作成、画像リクエスト生成、画像取得、スライドショー生成までの一連の動画素材作成パイプラインを実行します。 |
+| `gen-final-video`   | スライドショー生成、音声合成、中央字幕を統合した最終動画を一括生成します。                                                     |
 
 ### 個別ステージ実行 (`src/stage_runner.py`)
 
@@ -105,6 +107,8 @@ python src/stage_runner.py gen-slideshow
 | `gen-img-req`   | 音声のメタデータ(`voice_data.json`)をもとに、画像リクエストJSONをGeminiで生成します。                                    |
 | `fetch-images`  | 画像リクエスト(`img_request.json`)をもとに、Pixabayから画像をダウンロードし、画像リスト(`slide_imgs.json`)を生成します。 |
 | `gen-slideshow` | 画像リスト(`slide_imgs.json`)をもとに、スライドショー動画(`slides.mp4`)を生成します。                                    |
+| `gen-subtitle`  | 音声のメタデータ(`voice_data.json`)をもとに、字幕のみの動画(`subtitle.mp4`)を生成します。                                 |
+| `gen-final-video`| スライドショー、音声、字幕を統合した最終動画(`final_video.mp4`)を生成します。                                           |
 
 ## 📂 ディレクトリ構成 (Directory Structure)
 
