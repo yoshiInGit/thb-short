@@ -33,19 +33,30 @@
 ### セットアップ (Installation)
 
 1.  **環境変数の設定**:
-    プロジェクトルートに `.env` ファイルを作成し、必要なAPIキーを設定してください。
+    プロジェクトルートに `.env` ファイルを作成し、以下の設定を行ってください。
 
     ```text
-    GEMINI_API_KEY=your_gemini_api_key
-    PIXABAY_API_KEY=your_pixabay_api_key  # 画像取得機能を使用する場合に必要
-    USE_DUMMY_GEMINI=false               # テスト用にダミーデータを使用する場合は true
+    GEMINI_API_KEY=your_gemini_api_key    # Gemini APIの利用に必須
+    PIXABAY_API_KEY=your_pixabay_api_key  # 画像自動取得機能を使用する場合に必要
+    USE_DUMMY_GEMINI=false               # テスト用にAPIを叩かずダミーを使用する場合は true
     ```
 
 2.  **必要なディレクトリとファイルの準備**:
-    以下のディレクトリやファイルは `.gitignore` で除外されていますが、プロジェクトの実行に必要です。
-    - **プロンプトテンプレート**: `src/prompts/` ディレクトリを作成し、必要なプロンプトファイル（`make_script.txt` 等）を配置してください。
-    - **入力データ**: `src/data/input/trivia.txt` に、台本の元となる雑学テキストを記入します。
-    - **出力・ログ用**: `src/data/output/` および `src/logs/` ディレクトリは実行時に自動生成または使用されます。
+    以下のファイル・ディレクトリは `.gitignore` で除外されていますが、実行に必要です。手動で作成または配置してください。
+
+    -   **プロンプトテンプレート (`src/prompts/`)**:
+        AIへの指示文を格納します。以下のファイルが必要です。
+        -   `make_script.txt`: 基本台本生成用
+        -   `add_character_script.txt`: キャラクター口調変換用
+        -   `output_coeroink_txt.txt`: COEIROINK形式整形用
+        -   `generate_img_request.txt`: 画像リクエスト生成用
+    -   **入力データ (`src/data/input/`)**:
+        -   `trivia.txt`: 台本の元となる雑学テキスト（必須）
+        -   `voice/`: 音声合成済みの素材を格納するディレクトリ
+            -   `001_xxx.wav`, `001_xxx.txt` のような形式で、番号順に結合されます。
+    -   **作業・出力用 (実行時に自動生成)**:
+        -   `src/data/output/`: 各ステージの中間データや最終成果物が出力されます。
+        -   `src/logs/`: Gemini APIとの通信ログが保存されます。
 
 ## 📖 使い方 (Usage)
 
