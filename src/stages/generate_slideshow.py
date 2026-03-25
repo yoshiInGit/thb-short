@@ -59,6 +59,14 @@ def _create_slide_clip(slide: SlideItem) -> ImageClip | None:
     # レイアウト適用 (Cover Crop)
     clip = _apply_cover_layout(clip, SLIDESHOW_RESOLUTION)
 
+    # ズーム効果の追加 (Ken Burns Effect)
+    # クリップの開始から終了にかけて、少しずつ拡大する
+    def zoom_in(t):
+        # 1.0倍から1.1倍まで拡大
+        return 1.0 + 0.1 * (t / duration)
+
+    clip = clip.resized(zoom_in)
+
     # エフェクト適用 (MoviePy 2.0)
     clip = clip.with_effects([
         vfx.FadeIn(SLIDESHOW_FADE_DURATION),
