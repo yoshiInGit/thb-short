@@ -43,20 +43,19 @@
 
 2.  **必要なディレクトリとファイルの準備**:
     以下のファイル・ディレクトリは `.gitignore` で除外されていますが、実行に必要です。手動で作成または配置してください。
-
-    -   **プロンプトテンプレート (`src/prompts/`)**:
-        AIへの指示文を格納します。以下のファイルが必要です。
-        -   `make_script.txt`: 基本台本生成用
-        -   `add_character_script.txt`: キャラクター口調変換用
-        -   `output_coeroink_txt.txt`: COEIROINK形式整形用
-        -   `generate_img_request.txt`: 画像リクエスト生成用
-    -   **入力データ (`src/data/input/`)**:
-        -   `trivia.txt`: 台本の元となる雑学テキスト（必須）
-        -   `voice/`: 音声合成済みの素材を格納するディレクトリ
-            -   `001_xxx.wav`, `001_xxx.txt` のような形式で、番号順に結合されます。
-    -   **作業・出力用 (実行時に自動生成)**:
-        -   `src/data/output/`: 各ステージの中間データや最終成果物が出力されます。
-        -   `src/logs/`: Gemini APIとの通信ログが保存されます。
+    - **プロンプトテンプレート (`src/prompts/`)**:
+      AIへの指示文を格納します。以下のファイルが必要です。
+      - `make_script.txt`: 基本台本生成用
+      - `add_character_script.txt`: キャラクター口調変換用
+      - `output_coeroink_txt.txt`: COEIROINK形式整形用
+      - `generate_img_request.txt`: 画像リクエスト生成用
+    - **入力データ (`src/data/input/`)**:
+      - `trivia.txt`: 台本の元となる雑学テキスト（必須）
+      - `voice/`: 音声合成済みの素材を格納するディレクトリ
+        - `001_xxx.wav`, `001_xxx.txt` のような形式で、番号順に結合されます。
+    - **作業・出力用 (実行時に自動生成)**:
+      - `src/data/output/`: 各ステージの中間データや最終成果物が出力されます。
+      - `src/logs/`: Gemini APIとの通信ログが保存されます。
 
 ## 📖 使い方 (Usage)
 
@@ -89,7 +88,7 @@ python main.py [コマンド]
 | :------------------ | :------------------------------------------------------------------------------------------------------------------------------- |
 | `gen-script`        | 雑学テキストの読み込みから、ベース台本生成、キャラクター口調変換、COEIROINK形式出力までの全ステップを連続で実行します。          |
 | `gen-video-footage` | 音声データ生成、字幕動画作成、画像リクエスト生成、画像取得、スライドショー生成までの一連の動画素材作成パイプラインを実行します。 |
-| `gen-final-video`   | スライドショー生成、音声合成、中央字幕を統合した最終動画を一括生成します。(※現在は使用していません)                                                     |
+| `gen-final-video`   | スライドショー生成、音声合成、中央字幕を統合した最終動画を一括生成します。(※現在は使用していません)                              |
 
 ### 個別ステージ実行 (`stage_runner.py`)
 
@@ -109,37 +108,41 @@ python stage_runner.py fetch-images
 python stage_runner.py gen-slideshow
 ```
 
-| 引数 (ステージ) | 説明                                                                                                                     |
-| :-------------- | :----------------------------------------------------------------------------------------------------------------------- |
-| `make-script`   | 入力テキスト(`data/input/trivia.txt`)からベースとなる台本(`make_script.json`)のみを生成します。                      |
-| `add-char`      | 既存の台本データ(`make_script.json`)を元に、キャラクター口調の台本(`add_character.json`)のみに変換します。               |
-| `coeroink`      | 既存のキャラクター台本データ(`add_character.json`)を元に、COEIROINK用テキストが出力されます。                            |
-| `gen-voice`     | 録音済み音声ファイル(`data/input/voice/`)を結合し、音声(`voice.wav`)とメタデータ(`voice_data.json`)を生成します。   |
-| `gen-img-req`   | 音声のメタデータ(`voice_data.json`)をもとに、画像リクエストJSONをGeminiで生成します。                                    |
-| `fetch-images`  | 画像リクエスト(`img_request.json`)をもとに、Pixabayから画像をダウンロードし、画像リスト(`slide_imgs.json`)を生成します。 |
-| `gen-slideshow` | 画像リスト(`slide_imgs.json`)をもとに、スライドショー動画(`slides.mp4`)を生成します。                                    |
-| `gen-subtitle`  | 音声のメタデータ(`voice_data.json`)をもとに、字幕のみの動画(`subtitle.mp4`)を生成します。                                 |
-| `gen-final-video`| スライドショー、音声、字幕を統合した最終動画(`final_video.mp4`)を生成します。(※現在は使用していません)                                           |
+| 引数 (ステージ)   | 説明                                                                                                                     |
+| :---------------- | :----------------------------------------------------------------------------------------------------------------------- |
+| `make-script`     | 入力テキスト(`data/input/trivia.txt`)からベースとなる台本(`make_script.json`)のみを生成します。                          |
+| `add-char`        | 既存の台本データ(`make_script.json`)を元に、キャラクター口調の台本(`add_character.json`)のみに変換します。               |
+| `coeroink`        | 既存のキャラクター台本データ(`add_character.json`)を元に、COEIROINK用テキストが出力されます。                            |
+| `gen-voice`       | 録音済み音声ファイル(`data/input/voice/`)を結合し、音声(`voice.wav`)とメタデータ(`voice_data.json`)を生成します。        |
+| `gen-img-req`     | 音声のメタデータ(`voice_data.json`)をもとに、画像リクエストJSONをGeminiで生成します。                                    |
+| `fetch-images`    | 画像リクエスト(`img_request.json`)をもとに、Pixabayから画像をダウンロードし、画像リスト(`slide_imgs.json`)を生成します。 |
+| `gen-slideshow`   | 画像リスト(`slide_imgs.json`)をもとに、スライドショー動画(`slides.mp4`)を生成します。                                    |
+| `gen-subtitle`    | 音声のメタデータ(`voice_data.json`)をもとに、字幕のみの動画(`subtitle.mp4`)を生成します。                                |
+| `gen-final-video` | スライドショー、音声、字幕を統合した最終動画(`final_video.mp4`)を生成します。(※現在は使用していません)                   |
 
 ## 📊 生成されるデータの説明 (Data Descriptions)
 
 各工程（ステージ）で生成される主要なデータとその役割は以下の通りです。ほとんどの中間データは `data/output/intermediate/` に保存されます。
 
 ### 台本・テキスト関連
+
 - **`make_script.json`**: 入力テキストから抽出された、タイトルと文節ごとの基本台本データ。
 - **`add_character.json`**: キャラクター固有の口調や表現に変換された台本データ。
 - **`coeroink.txt`**: 音声合成ソフト（COEIROINK等）での読み上げ用に改行・整形されたテキストファイル。
 
 ### 音声・タイミング関連
+
 - **`voice.wav`**: 個別に生成された音声を結合した動画用のメイン音声ファイル。
 - **`voice_data.json`**: 各文節の音声の開始・終了時間や、画像切り替えタイミングを記録したメタデータ。
 
 ### 画像・素材関連
+
 - **`img_request.json`**: Geminiによって生成された、各文節に最適な画像をPixabay等で検索するためのクエリリスト。
 - **`slide_imgs.json`**: ダウンロードされた画像のパスと、それに対応する文節のインデックスを管理するリスト。
 - **`slide_imgs/`**: (ディレクトリ) 実際にダウンロードされた各種素材画像が格納されます。
 
 ### 動画成果物
+
 - **`slides.mp4`**: 音声のタイミングに合わせ、フェード効果をつけて画像を切り替えるスライドショー動画。
 - **`subtitle.mp4`**: 音声に合わせて中央にテロップを表示する、背景が透明（または特定色）の字幕動画。
 - **`final_video.mp4`**: スライドショー、音声、字幕をすべて統合した最終的な完成版動画。(※現在は利用停止中)
@@ -200,3 +203,5 @@ graph TD
 ## 🌟 今後の展望 (Future Prospects)
 
 - **音声生成の完全自動化**: 現在は手動で音声を書き出していますが、COEIROINKのAPIを利用して、台本から音声を自動生成するステージの実装を予定されています。
+
+- **動画編集機能の強化**: 現在はスライドショー形式ですが、よりリッチな動画編集機能（BGMの自動選定・挿入、効果音の追加等）の実装を検討されています。
