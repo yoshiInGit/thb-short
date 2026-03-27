@@ -49,6 +49,10 @@
       - `add_character_script.txt`: キャラクター口調変換用
       - `output_coeroink_txt.txt`: COEIROINK形式整形用
       - `generate_img_request.txt`: 画像リクエスト生成用
+
+      > [!IMPORTANT]
+      > プロンプトファイルは機密情報を含む可能性があるため、リポジトリには含まれていません。
+      > 以下の[プロンプト作成ガイドライン](#プロンプト作成ガイドライン)に従って各自作成してください。
     - **入力データ (`src/data/input/`)**:
       - `trivia.txt`: 台本の元となる雑学テキスト（必須）
       - `voice/`: 音声合成済みの素材を格納するディレクトリ
@@ -56,6 +60,56 @@
     - **作業・出力用 (実行時に自動生成)**:
       - `src/data/output/`: 各ステージの中間データや最終成果物が出力されます。
       - `src/logs/`: Gemini APIとの通信ログが保存されます。
+
+### プロンプト作成ガイドライン
+
+本プロジェクトでは、Gemini APIへの指示にXMLタグ形式のテンプレートを使用しています。独自のプロンプトを作成する場合は、以下の構成を推奨します。
+
+#### 基本構造
+
+プロンプトファイル（`.txt`）内では、以下のタグを使用して構成を整理してください。
+
+```text
+<system_role>
+AIの役割（例：Youtubeショート動画の構成作家）
+</system_role>
+
+<context>
+背景情報や動画のコンセプト、ターゲット層など
+</context>
+
+<constraints>
+- 出力は必ずJSON形式にすること
+- 解説は日本語で行うこと
+- 余計な挨拶は含めないこと
+</constraints>
+
+<input_data>
+$variable_name  <-- ここにプログラムからデータが注入されます
+</input_data>
+
+<output_format>
+期待するJSONの構造例を記述します。
+</output_format>
+
+<instruction>
+具体的な指示文を記述します。
+</instruction>
+```
+
+#### 各ファイルの役割と出力要件
+
+各ステージで期待されるJSONの構造は以下の通りです。これらに基づいて `response_schema` が適用されます。
+
+| ファイル名 | 役割 | 入力変数 | 期待される出力例 (JSON形式) |
+| :--- | :--- | :--- | :--- |
+| `make_script.txt` | 雑学から台本を生成 | `$trivia_text` | `{"thinking": "...", "title": "...", "script": "..."}` |
+| `add_character_script.txt` | キャラクター口調に変換 | `$script_text` | `{"thinking": "...", "script": "..."}` |
+| `output_coeroink_txt.txt` | 読み上げ用に整形 | `$script_text` | `{"thinking": "...", "break_script": "..."}` |
+| `generate_img_request.txt` | 画像検索ワード生成 | `$voice_data` | `{"thinking": "...", "img_request": [{"time_start": 0, "time_end": 1000, "img_description": "cat"}, ...]}` |
+
+> [!TIP]
+> `thinking` フィールドはAIの思考過程を出力させるために設けています。これにより、最終的な出力（`script` や `title`）の精度向上が期待できます。
 
 ## 📖 使い方 (Usage)
 
