@@ -45,7 +45,8 @@
     以下のファイル・ディレクトリは `.gitignore` で除外されていますが、実行に必要です。手動で作成または配置してください。
     - **プロンプトテンプレート (`src/prompts/`)**:
       AIへの指示文を格納します。以下のファイルが必要です。
-      - `make_script.txt`: 基本台本生成用
+      - `make_script.txt`: 基本台本生成（初稿）用
+      - `make_script_verify.txt`: 台本初稿の検証・改善用
       - `add_character_script.txt`: キャラクター口調変換用
       - `output_coeroink_txt.txt`: COEIROINK形式整形用
       - `generate_img_request.txt`: 画像リクエスト生成用
@@ -103,7 +104,8 @@ $variable_name  <-- ここにプログラムからデータが注入されます
 
 | ファイル名 | 役割 | 入力変数 | 期待される出力例 (JSON形式) |
 | :--- | :--- | :--- | :--- |
-| `make_script.txt` | 雑学から台本を生成 | `$trivia_text` | `{"thinking": "...", "title": "...", "script": "..."}` |
+| `make_script.txt` | 雑学から台本の初稿を生成 | `$trivia_text` | `{"thinking": "...", "title": "...", "script": "..."}` |
+| `make_script_verify.txt` | 初稿を検証し改善版を出力 | `$draft_title`, `$draft_script` | `{"verification_thinking": "...", "title": "...", "script": "..."}` |
 | `add_character_script.txt` | キャラクター口調に変換 | `$script_text` | `{"thinking": "...", "script": "..."}` |
 | `output_coeroink_txt.txt` | 読み上げ用に整形 | `$script_text` | `{"thinking": "...", "break_script": "..."}` |
 | `generate_img_request.txt` | 画像検索ワード生成 | `$voice_data` | `{"thinking": "...", "img_request": [{"time_start": 0, "time_end": 1000, "img_description": "cat"}, ...]}` |
