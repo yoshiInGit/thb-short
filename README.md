@@ -113,6 +113,72 @@ $variable_name  <-- ここにプログラムからデータが注入されます
 > [!TIP]
 > `thinking` フィールドはAIの思考過程を出力させるために設けています。これにより、最終的な出力（`script` や `title`）の精度向上が期待できます。
 
+## 🔄 全体の実行フロー (Workflow Overview)
+
+動画を1本完成させるまでの全体の流れは以下の通りです。\
+**STEP 2は手動作業**が必要なため、パイプラインは2フェーズに分かれています。
+
+```mermaid
+flowchart TD
+    classDef auto fill:#bfffbf,stroke:#4a4,stroke-width:1px,color:#000
+    classDef manual fill:#fff0bf,stroke:#aa8,stroke-width:2px,stroke-dasharray:5 5,color:#000
+    classDef artifact fill:#e8e8ff,stroke:#88a,stroke-width:1px,color:#000
+    classDef cmd fill:#ffbfbf,stroke:#a44,stroke-width:1px,color:#000
+
+    Start([開始]) --> Input
+
+    Input["📄 trivia.txt\n（雑学テキストを作成）"]:::artifact
+
+    Input --> S1
+
+    subgraph STEP1["STEP ① 台本生成  |  gen-script"]
+        S1["make_script\n台本の初稿を生成\n✅ 検証・改善も自動実行"]:::auto
+        S2["add_character_script\nキャラクター口調に変換"]:::auto
+        S3["output_coeroink_txt\nCOEIROINK用テキスト整形"]:::auto
+        S1 --> S2 --> S3
+    end
+
+    S3 --> CoeroinkTxt
+
+    CoeroinkTxt["📄 coeroink.txt\n（整形済み台本）"]:::artifact
+
+    CoeroinkTxt --> M1
+
+    subgraph MANUAL["✋ 手動作業  |  COEIROINKで音声生成"]
+        M1["COEIROINKにテキストを貼り付け"]:::manual
+        M2["音声ファイルを書き出し\n001_xxx.wav / 001_xxx.txt"]:::manual
+        M1 --> M2
+    end
+
+    M2 --> VoiceDir
+
+    VoiceDir["📁 src/data/input/voice/\n（音声ファイルを配置）"]:::artifact
+
+    VoiceDir --> S4
+
+    subgraph STEP2["STEP ② 動画素材生成  |  gen-video-footage"]
+        S4["generate_voice_data\n音声を結合・タイミング解析"]:::auto
+        S5["generate_subtitle\n字幕動画を生成"]:::auto
+        S6["generate_img_request\n画像リクエストをGeminiで生成"]:::auto
+        S7["fetch_images\nPixabayから画像をダウンロード"]:::auto
+        S8["generate_slideshow\nフェード付きスライドショー生成"]:::auto
+        S4 --> S5
+        S4 --> S6
+        S6 --> S7 --> S8
+    end
+
+    S5 --> Out1["🎬 subtitle.mp4\n（字幕動画）"]:::artifact
+    S8 --> Out2["🎬 slides.mp4\n（スライドショー動画）"]:::artifact
+    Out1 --> Finish
+    Out2 --> Finish
+
+    Finish(["動画編集ソフトで\n素材を合成して完成 🎉"])
+```
+
+> [!NOTE]
+> 緑のノードは自動実行、黄色の破線ノードは手動作業です。\
+> `subtitle.mp4`（字幕）と `slides.mp4`（スライドショー）は、その後お好みの動画編集ソフトで合成してください。
+
 ## 📖 使い方 (Usage)
 
 Docker Composeを利用してパイプラインを実行します。
