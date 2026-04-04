@@ -1,8 +1,8 @@
 import os
-from stages.generate_script import make_script, add_character_script, output_coeroink_txt
+from stages.generate_script import make_script, output_coeroink_txt
 from util.file_io import save_json
 from config import (
-    MAKE_SCRIPT_JSON, ADD_CHARACTER_JSON, COEROINK_JSON, COEROINK_TXT, TRIVIA_INPUT_PATH
+    MAKE_SCRIPT_JSON, COEROINK_JSON, COEROINK_TXT, TRIVIA_INPUT_PATH
 )
 
 def gen_script_pipeline():
@@ -21,12 +21,8 @@ def gen_script_pipeline():
         script_res = make_script(trivia_text)
         save_json(MAKE_SCRIPT_JSON, script_res.model_dump())
 
-        # 2. Add Character
-        char_res = add_character_script(script_res.script)
-        save_json(ADD_CHARACTER_JSON, char_res.model_dump())
-
-        # 3. Output Coeroink Txt
-        coeroink_res = output_coeroink_txt(char_res.script)
+        # 2. Output Coeroink Txt
+        coeroink_res = output_coeroink_txt(script_res.script)
         save_json(COEROINK_JSON, coeroink_res.model_dump())
         
         # テキストファイルの保存
