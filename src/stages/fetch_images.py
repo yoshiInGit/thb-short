@@ -31,7 +31,7 @@ def fetch_pixabay_images(img_request_data: dict) -> dict:
             "q": query,
             "image_type": "photo",
             "per_page": 3,
-            "orientation": "vertical",
+            "orientation": "horizontal",
             "safesearch": "true"
         }
         
