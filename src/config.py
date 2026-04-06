@@ -39,6 +39,13 @@ DEFAULT_MODEL = "gemini-3.1-flash-lite-preview"
 DEFAULT_TEMPERATURE = 0.7
 COEROINK_TEMPERATURE = 0.2
 
+# ===== Prompt Settings =====
+MAKE_SCRIPT_PROMPT_FILE = "make_script.txt"
+MAKE_SCRIPT_VERIFY_PROMPT_FILE = "make_script_verify.txt"
+ADD_CHARACTER_SCRIPT_PROMPT_FILE = "add_character_script.txt"
+OUTPUT_COEROINK_TXT_PROMPT_FILE = "output_coeroink_txt.txt"
+GENERATE_IMG_REQUEST_PROMPT_FILE = "generate_img_request.txt"
+
 # ===== Subtitle Configurations =====
 RESOLUTION = (1920, 330)
 BG_COLOR = (255, 255, 255) # White
