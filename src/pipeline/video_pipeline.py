@@ -35,8 +35,8 @@ def gen_video_footage():
 
     # 2. 字幕生成
     print("\n--- Stage 2: Generate Subtitle ---")
-    subtitle_clip = generate_subtitle(voice_data)
-    subtitle_clip.write_videofile(OUTPUT_MP4, fps=FPS, codec="libx264")
+    subtitle_clip = generate_subtitle(voice_data, audio_path=OUTPUT_VOICE)
+    subtitle_clip.write_videofile(OUTPUT_MP4, fps=FPS, codec="libx264", audio_codec="aac")
     print(f"  -> Saved subtitle video to {OUTPUT_MP4}")
 
     # 3. 画像リクエスト生成

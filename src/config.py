@@ -66,4 +66,4 @@ WRAP_WIDTH = 12  # 1行あたりの最大文字数
 TEXT_POS = (440, 'center')
 TEXT_MARGIN_RIGHT = 40  # 右端の余白
 TRANSITION_DURATION = 0.2  # フェードイン・アウトの時間(秒)
-SILENCE_DURATION_MS = 250  # 句読点後の無音時間
+SILENCE_DURATION_MS = 350  # 句読点後の無音時間

@@ -11,6 +11,7 @@ from config import (
     VOICE_DATA_JSON, IMG_REQUEST_JSON, SLIDE_IMGS_JSON, SLIDESHOW_OUTPUT_MP4, 
     OUTPUT_VOICE, FINAL_VIDEO_OUTPUT_MP4, OUTPUT_MP4, FPS
 )
+from moviepy import AudioFileClip
 
 def _parse_args():
     """コマンドライン引数の解析"""
@@ -51,8 +52,8 @@ def main():
         case "gen-subtitle":
             voice_data = load_json(VOICE_DATA_JSON)
             print(f"Running gen-subtitle stage...")
-            subtitle_clip = generate_subtitle(voice_data)
-            subtitle_clip.write_videofile(OUTPUT_MP4, fps=FPS, codec="libx264")
+            subtitle_clip = generate_subtitle(voice_data, audio_path=OUTPUT_VOICE)
+            subtitle_clip.write_videofile(OUTPUT_MP4, fps=FPS, codec="libx264", audio_codec="aac")
             print(f"  -> Saved subtitle video to {OUTPUT_MP4}")
 
         case "gen-img-req":
@@ -85,7 +86,6 @@ def main():
                 return
 
             # 音声の読み込み
-            from moviepy import AudioFileClip
             audio = AudioFileClip(OUTPUT_VOICE)
 
             # 最終合成

@@ -26,8 +26,8 @@ def generate_img_request(voice_data: dict) -> ImgRequestResponse:
         temperature=DEFAULT_TEMPERATURE
     )
 
-def generate_subtitle(voice_data: dict) -> CompositeVideoClip:
-    """音声データをもとに字幕動画（CompositeVideoClip）を生成する"""
+def generate_subtitle(voice_data: dict, audio_path: str = None) -> CompositeVideoClip:
+    """音声データをもとに字幕動画（CompositeVideoClip）を生成する。audio_pathが指定されていれば音声も統合する。"""
     print("Running generate_subtitle...")
 
     words_data = voice_data.get("words", [])
@@ -72,4 +72,13 @@ def generate_subtitle(voice_data: dict) -> CompositeVideoClip:
                            .with_duration(duration_s)
         clips.append(txt_clip)
 
-    return CompositeVideoClip(clips)
+    final_clip = CompositeVideoClip(clips)
+
+    # 音声の統合
+    if audio_path and os.path.exists(audio_path):
+        from moviepy import AudioFileClip
+        audio_clip = AudioFileClip(audio_path)
+        final_clip = final_clip.with_audio(audio_clip)
+        print(f"  -> Audio attached from {audio_path}")
+    
+    return final_clip
