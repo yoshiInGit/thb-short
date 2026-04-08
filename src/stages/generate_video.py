@@ -1,22 +1,22 @@
 import os
 import json
-from moviepy import TextClip, ColorClip, CompositeVideoClip
+import string
+from moviepy import TextClip, ColorClip, CompositeVideoClip, AudioFileClip
 from model.video import ImgRequestResponse
-from util.prompt import load_prompt
 from util.gemini import generate_structured_content
 from config import (
     DEFAULT_MODEL, DEFAULT_TEMPERATURE, RESOLUTION, BG_COLOR, FONT_SIZE,
     FONT_COLOR, STROKE_COLOR, STROKE_WIDTH, FONT_NAME, TEXT_POS,
-    TEXT_MARGIN_RIGHT, GENERATE_IMG_REQUEST_PROMPT_FILE
+    TEXT_MARGIN_RIGHT
 )
 
-def generate_img_request(voice_data: dict) -> ImgRequestResponse:
+def generate_img_request(voice_data: dict, prompt_template: str) -> ImgRequestResponse:
     """音声データをもとに、Geminiで画像リクエストを生成する"""
     print("Running generate_img_request...")
     
     # voice_dataを文字列化して渡す
     voice_data_str = json.dumps(voice_data, ensure_ascii=False, indent=2)
-    prompt = load_prompt(GENERATE_IMG_REQUEST_PROMPT_FILE, voice_data=voice_data_str)
+    prompt = string.Template(prompt_template).safe_substitute(voice_data=voice_data_str)
     
     return generate_structured_content(
         func_name="generate_img_request",
@@ -26,8 +26,8 @@ def generate_img_request(voice_data: dict) -> ImgRequestResponse:
         temperature=DEFAULT_TEMPERATURE
     )
 
-def generate_subtitle(voice_data: dict, audio_path: str = None) -> CompositeVideoClip:
-    """音声データをもとに字幕動画（CompositeVideoClip）を生成する。audio_pathが指定されていれば音声も統合する。"""
+def generate_subtitle(voice_data: dict, audio_clip: AudioFileClip = None) -> CompositeVideoClip:
+    """音声データをもとに字幕動画（CompositeVideoClip）を生成する。audio_clipが指定されていれば音声も統合する。"""
     print("Running generate_subtitle...")
 
     words_data = voice_data.get("words", [])
@@ -75,10 +75,8 @@ def generate_subtitle(voice_data: dict, audio_path: str = None) -> CompositeVide
     final_clip = CompositeVideoClip(clips)
 
     # 音声の統合
-    if audio_path and os.path.exists(audio_path):
-        from moviepy import AudioFileClip
-        audio_clip = AudioFileClip(audio_path)
+    if audio_clip:
         final_clip = final_clip.with_audio(audio_clip)
-        print(f"  -> Audio attached from {audio_path}")
+        print(f"  -> Audio attached from provided clip")
     
     return final_clip

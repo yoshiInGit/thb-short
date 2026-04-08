@@ -79,6 +79,9 @@ def _create_slide_clip(slide: SlideItem) -> ImageClip | None:
 def generate_slideshow(slide_imgs_data: dict) -> CompositeVideoClip | None:
     """
     slide_imgs.json のデータに基づいてスライドショー動画を生成する
+    
+    NOTE: この関数は例外として、関数内での画像ファイル読み込み（ImageClip）を維持しています。
+    理由：大量の画像を事前にメモリに読み込むことによるメモリ不足のリスクを避けるため。
     """
     print("Running generate_slideshow (Refactored)...")
     

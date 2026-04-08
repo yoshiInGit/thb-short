@@ -40,7 +40,12 @@ def _has_punctuation_at_end(text: str) -> bool:
     return text[-1] in punctuations
 
 def generate_voice_data() -> tuple[AudioSegment, list[dict]]:
-    """音声ファイルの結合とメタデータ(JSON)の生成を行う"""
+    """
+    音声ファイルの結合とメタデータ(JSON)の生成を行う
+    
+    NOTE: この関数は例外として、関数内でのディレクトリ走査やファイル読み込みを維持しています。
+    理由：音声データの複雑な結合処理とメタデータ生成が密接に関連しているため。
+    """
     print("Running generate_voice_data...")
     
     if not os.path.exists(VOICE_DIR):
