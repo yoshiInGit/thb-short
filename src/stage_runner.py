@@ -6,10 +6,14 @@ from stages.generate_video import generate_img_request, generate_subtitle
 from stages.generate_final_video import generate_final_video
 from stages.generate_voice_data import generate_voice_data
 from util.file_io import load_json, save_json
+from util.prompt import read_prompt_template
 from config import (
     MAKE_SCRIPT_JSON, ADD_CHARACTER_JSON, COEROINK_JSON, TRIVIA_INPUT_PATH,
     VOICE_DATA_JSON, IMG_REQUEST_JSON, SLIDE_IMGS_JSON, SLIDESHOW_OUTPUT_MP4, 
-    OUTPUT_VOICE, FINAL_VIDEO_OUTPUT_MP4, OUTPUT_MP4, FPS
+    OUTPUT_VOICE, FINAL_VIDEO_OUTPUT_MP4, OUTPUT_MP4, FPS,
+    MAKE_SCRIPT_PROMPT_FILE, MAKE_SCRIPT_VERIFY_PROMPT_FILE,
+    ADD_CHARACTER_SCRIPT_PROMPT_FILE, OUTPUT_COEROINK_TXT_PROMPT_FILE,
+    GENERATE_IMG_REQUEST_PROMPT_FILE
 )
 from moviepy import AudioFileClip
 
@@ -30,17 +34,22 @@ def main():
                 return
             with open(TRIVIA_INPUT_PATH, "r", encoding="utf-8") as f:
                 trivia_text = f.read()
-            res = make_script(trivia_text)
+            
+            draft_template = read_prompt_template(MAKE_SCRIPT_PROMPT_FILE)
+            verify_template = read_prompt_template(MAKE_SCRIPT_VERIFY_PROMPT_FILE)
+            res = make_script(trivia_text, draft_template, verify_template)
             save_json(MAKE_SCRIPT_JSON, res.model_dump())
 
         case "add-char":
             script_data = load_json(MAKE_SCRIPT_JSON)
-            res = add_character_script(script_data.get("script", ""))
+            prompt_template = read_prompt_template(ADD_CHARACTER_SCRIPT_PROMPT_FILE)
+            res = add_character_script(script_data.get("script", ""), prompt_template)
             save_json(ADD_CHARACTER_JSON, res.model_dump())
 
         case "coeroink":
             char_data = load_json(ADD_CHARACTER_JSON)
-            res = output_coeroink_txt(char_data.get("script", ""))
+            prompt_template = read_prompt_template(OUTPUT_COEROINK_TXT_PROMPT_FILE)
+            res = output_coeroink_txt(char_data.get("script", ""), prompt_template)
             save_json(COEROINK_JSON, res.model_dump())
 
         case "gen-voice":
@@ -52,13 +61,15 @@ def main():
         case "gen-subtitle":
             voice_data = load_json(VOICE_DATA_JSON)
             print(f"Running gen-subtitle stage...")
-            subtitle_clip = generate_subtitle(voice_data, audio_path=OUTPUT_VOICE)
+            audio_clip = AudioFileClip(OUTPUT_VOICE)
+            subtitle_clip = generate_subtitle(voice_data, audio_clip=audio_clip)
             subtitle_clip.write_videofile(OUTPUT_MP4, fps=FPS, codec="libx264", audio_codec="aac")
             print(f"  -> Saved subtitle video to {OUTPUT_MP4}")
 
         case "gen-img-req":
             voice_data = load_json(VOICE_DATA_JSON)
-            res = generate_img_request(voice_data)
+            prompt_template = read_prompt_template(GENERATE_IMG_REQUEST_PROMPT_FILE)
+            res = generate_img_request(voice_data, prompt_template)
             save_json(IMG_REQUEST_JSON, res.model_dump())
 
         case "fetch-images":

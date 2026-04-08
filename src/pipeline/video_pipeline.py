@@ -1,12 +1,14 @@
-import os
+from moviepy import AudioFileClip
 from stages.generate_voice_data import generate_voice_data
 from stages.generate_video import generate_subtitle, generate_img_request
 from stages.fetch_images import fetch_pixabay_images
 from stages.generate_slideshow import generate_slideshow
 from util.file_io import save_json
+from util.prompt import read_prompt_template
 from config import (
     VOICE_DATA_JSON, OUTPUT_VOICE, IMG_REQUEST_JSON, 
-    SLIDE_IMGS_JSON, OUTPUT_MP4, SLIDESHOW_OUTPUT_MP4, FPS
+    SLIDE_IMGS_JSON, OUTPUT_MP4, SLIDESHOW_OUTPUT_MP4, FPS,
+    GENERATE_IMG_REQUEST_PROMPT_FILE
 )
 
 def gen_video_footage():
@@ -35,13 +37,15 @@ def gen_video_footage():
 
     # 2. 字幕生成
     print("\n--- Stage 2: Generate Subtitle ---")
-    subtitle_clip = generate_subtitle(voice_data, audio_path=OUTPUT_VOICE)
+    audio_clip = AudioFileClip(OUTPUT_VOICE)
+    subtitle_clip = generate_subtitle(voice_data, audio_clip=audio_clip)
     subtitle_clip.write_videofile(OUTPUT_MP4, fps=FPS, codec="libx264", audio_codec="aac")
     print(f"  -> Saved subtitle video to {OUTPUT_MP4}")
 
     # 3. 画像リクエスト生成
     print("\n--- Stage 3: Generate Image Request ---")
-    img_req_res = generate_img_request(voice_data)
+    img_req_template = read_prompt_template(GENERATE_IMG_REQUEST_PROMPT_FILE)
+    img_req_res = generate_img_request(voice_data, img_req_template)
     save_json(IMG_REQUEST_JSON, img_req_res.model_dump())
     print(f"  -> Saved image request to {IMG_REQUEST_JSON}")
 

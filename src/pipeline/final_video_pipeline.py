@@ -4,9 +4,11 @@ from stages.generate_video import generate_img_request
 from stages.fetch_images import fetch_pixabay_images
 from stages.generate_final_video import generate_final_video
 from util.file_io import save_json
+from util.prompt import read_prompt_template
 from config import (
     VOICE_DATA_JSON, OUTPUT_VOICE, IMG_REQUEST_JSON, 
-    SLIDE_IMGS_JSON, FINAL_VIDEO_OUTPUT_MP4, FPS
+    SLIDE_IMGS_JSON, FINAL_VIDEO_OUTPUT_MP4, FPS,
+    GENERATE_IMG_REQUEST_PROMPT_FILE
 )
 
 def gen_final_video_pipeline():
@@ -34,7 +36,8 @@ def gen_final_video_pipeline():
 
     # 2. 画像リクエスト生成
     print("\n--- Stage 2: Generate Image Request ---")
-    img_req_res = generate_img_request(voice_data)
+    img_req_template = read_prompt_template(GENERATE_IMG_REQUEST_PROMPT_FILE)
+    img_req_res = generate_img_request(voice_data, img_req_template)
     img_req_data = img_req_res.model_dump()
     save_json(IMG_REQUEST_JSON, img_req_data)
     print(f"  -> Saved image request to {IMG_REQUEST_JSON}")
