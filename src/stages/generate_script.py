@@ -7,13 +7,13 @@ from config import (
 
 # ===== Processing Functions =====
 
-def make_script(trivia_text: str, draft_prompt_template: str, verify_prompt_template: str) -> MakeScriptResponse:
-    """雑学情報をもとに台本を生成する（2段階：初稿生成→検証・改善）"""
+def make_script(theme: str, trivia_text: str, draft_prompt_template: str, verify_prompt_template: str) -> MakeScriptResponse:
+    """テーマと雑学情報をもとに台本を生成する（2段階：初稿生成→検証・改善）"""
     print("Running make_script...")
 
     # --- 1回目: Thinking + 初稿出力 ---
     print("  [1/2] 初稿を生成中...")
-    draft_prompt = string.Template(draft_prompt_template).safe_substitute(trivia_text=trivia_text)
+    draft_prompt = string.Template(draft_prompt_template).safe_substitute(theme=theme, trivia_text=trivia_text)
     draft: MakeScriptDraftResponse = generate_structured_content(
         func_name="make_script_draft",
         model=DEFAULT_MODEL,

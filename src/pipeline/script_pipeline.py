@@ -3,7 +3,7 @@ from stages.generate_script import make_script, output_coeroink_txt
 from util.file_io import save_json
 from util.prompt import read_prompt_template
 from config import (
-    MAKE_SCRIPT_JSON, COEROINK_JSON, COEROINK_TXT, TRIVIA_INPUT_PATH,
+    MAKE_SCRIPT_JSON, COEROINK_JSON, COEROINK_TXT, TRIVIA_INPUT_PATH, THEME_INPUT_PATH,
     MAKE_SCRIPT_PROMPT_FILE, MAKE_SCRIPT_VERIFY_PROMPT_FILE,
     OUTPUT_COEROINK_TXT_PROMPT_FILE
 )
@@ -12,6 +12,9 @@ def gen_script_pipeline():
     """台本生成の一連のフローを実行する"""
     print("Starting automatic script generation pipeline...")
 
+        
+    with open(THEME_INPUT_PATH, "r", encoding="utf-8") as f:
+        theme = f.read()
         
     with open(TRIVIA_INPUT_PATH, "r", encoding="utf-8") as f:
         trivia_text = f.read()
@@ -22,7 +25,7 @@ def gen_script_pipeline():
     coeroink_template = read_prompt_template(OUTPUT_COEROINK_TXT_PROMPT_FILE)
 
     # 1. Make Script
-    script_res = make_script(trivia_text, draft_template, verify_template)
+    script_res = make_script(theme, trivia_text, draft_template, verify_template)
     save_json(MAKE_SCRIPT_JSON, script_res.model_dump())
 
     # 2. Output Coeroink Txt

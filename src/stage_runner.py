@@ -8,7 +8,7 @@ from stages.generate_voice_data import generate_voice_data
 from util.file_io import load_json, save_json
 from util.prompt import read_prompt_template
 from config import (
-    MAKE_SCRIPT_JSON, ADD_CHARACTER_JSON, COEROINK_JSON, TRIVIA_INPUT_PATH,
+    MAKE_SCRIPT_JSON, ADD_CHARACTER_JSON, COEROINK_JSON, TRIVIA_INPUT_PATH, THEME_INPUT_PATH,
     VOICE_DATA_JSON, IMG_REQUEST_JSON, SLIDE_IMGS_JSON, SLIDESHOW_OUTPUT_MP4, 
     OUTPUT_VOICE, FINAL_VIDEO_OUTPUT_MP4, OUTPUT_MP4, FPS,
     MAKE_SCRIPT_PROMPT_FILE, MAKE_SCRIPT_VERIFY_PROMPT_FILE,
@@ -32,12 +32,14 @@ def main():
             if not os.path.exists(TRIVIA_INPUT_PATH):
                 print(f"Error: Input file {TRIVIA_INPUT_PATH} not found.")
                 return
+            with open(THEME_INPUT_PATH, "r", encoding="utf-8") as f:
+                theme = f.read()
             with open(TRIVIA_INPUT_PATH, "r", encoding="utf-8") as f:
                 trivia_text = f.read()
             
             draft_template = read_prompt_template(MAKE_SCRIPT_PROMPT_FILE)
             verify_template = read_prompt_template(MAKE_SCRIPT_VERIFY_PROMPT_FILE)
-            res = make_script(trivia_text, draft_template, verify_template)
+            res = make_script(theme, trivia_text, draft_template, verify_template)
             save_json(MAKE_SCRIPT_JSON, res.model_dump())
 
         case "add-char":
