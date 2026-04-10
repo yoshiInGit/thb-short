@@ -1,30 +1,10 @@
 import os
-import json
-import string
 from moviepy import TextClip, ColorClip, CompositeVideoClip, AudioFileClip
-from model.video import ImgRequestResponse
-from util.gemini import generate_structured_content
 from config import (
-    DEFAULT_MODEL, DEFAULT_TEMPERATURE, RESOLUTION, BG_COLOR, FONT_SIZE,
+    RESOLUTION, BG_COLOR, FONT_SIZE,
     FONT_COLOR, STROKE_COLOR, STROKE_WIDTH, FONT_NAME, TEXT_POS,
     TEXT_MARGIN_RIGHT
 )
-
-def generate_img_request(voice_data: dict, prompt_template: str) -> ImgRequestResponse:
-    """音声データをもとに、Geminiで画像リクエストを生成する"""
-    print("Running generate_img_request...")
-    
-    # voice_dataを文字列化して渡す
-    voice_data_str = json.dumps(voice_data, ensure_ascii=False, indent=2)
-    prompt = string.Template(prompt_template).safe_substitute(voice_data=voice_data_str)
-    
-    return generate_structured_content(
-        func_name="generate_img_request",
-        model=DEFAULT_MODEL,
-        prompt=prompt,
-        response_schema=ImgRequestResponse,
-        temperature=DEFAULT_TEMPERATURE
-    )
 
 def generate_subtitle(voice_data: dict, audio_clip: AudioFileClip = None) -> CompositeVideoClip:
     """音声データをもとに字幕動画（CompositeVideoClip）を生成する。audio_clipが指定されていれば音声も統合する。"""

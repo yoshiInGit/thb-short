@@ -1,7 +1,6 @@
 import argparse
 from pipeline.script_pipeline import gen_script_pipeline
 from pipeline.video_pipeline import gen_video_footage
-from pipeline.final_video_pipeline import gen_final_video_pipeline
 
 def _parse_args():
     """コマンドライン引数の解析"""
@@ -12,10 +11,7 @@ def _parse_args():
     subparsers.add_parser("gen-script", help="台本生成に関する一連のパイプラインを実行します")
 
     # gen-video-footage パイプライン
-    subparsers.add_parser("gen-video-footage", help="音声、字幕、画像取得、スライドショー生成の一連のパイプラインを実行します")
-
-    # gen-final-video パイプライン
-    subparsers.add_parser("gen-final-video", help="スライドショー＋中央字幕＋音声の最終動画を一括生成します")
+    subparsers.add_parser("gen-video-footage", help="音声生成と字幕動画生成の一連のパイプラインを実行します")
 
     return parser.parse_args(), parser
 
@@ -28,9 +24,6 @@ def main():
             
         case "gen-video-footage":
             gen_video_footage()
-            
-        case "gen-final-video":
-            gen_final_video_pipeline()
             
         case _:
             parser.print_help()
