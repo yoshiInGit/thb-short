@@ -36,8 +36,9 @@ def gen_script_pipeline():
     full_content = f"{script_res.title}\n\n{coeroink_res.break_script}"
     
     
-    with open(COEROINK_TXT, "w", encoding="utf-8") as f:
-        f.write(full_content)
+    # 追記モードで保存
+    with open(COEROINK_TXT, "a", encoding="utf-8") as f:
+        f.write(f"\n\n{'='*30}\n{full_content}\n")
     
     print(f"  -> Saved text to {COEROINK_TXT}")
 
