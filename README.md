@@ -1,25 +1,21 @@
 # 雑学ショート動画台本生成器 (Trivia Short Script Generator)
 
-雑学テキストを元に、ショート動画制作に必要な台本や素材リストを Gemini API (Gemini 2.0 Flash) を活用して自動生成するツールです。
+雑学データとテーマを元に、ショート動画制作に必要な台本や字幕素材を Gemini API を活用して自動生成するツールです。
 
 ---
 
 ## 🚀 主な機能 (Key Features)
 
-1.  **台本生成 (make_script)**: 雑学テキストから動画用のタイトルと基本台本を生成します。
-2.  **キャラクター変換 (add_character_script)**: 台本を指定のキャラクター口調（例：ずんだもん）に変換します。
-3.  **COEIROINK形式出力 (output_coeroink_txt)**: 音声合成ソフトでの読み上げ用に、文節ごとに改行を入れたテキストファイルを出力します。
-4.  **画像リクエスト作成 (generate_img_request)**: 台本内容に基づき、動画編集で必要となる画像のリストを書き出します。
-5.  **画像取得 (fetch_images)**: 画像リクエストに基づき、Pixabay 等から素材画像を自動取得します。
-6.  **スライドショー生成 (generate_slideshow)**: 取得した画像と音声タイミングを合わせ、フェード効果付きのスライドショー動画を生成します。
-7.  **最終動画合成 (generate_final_video)**: スライドショー、音声、字幕（中央配置）を統合した完成版動画を生成します。(※現在は使用していません)
+1.  **台本生成 (gen-script)**: テーマと雑学テキストから、AIによる検証・改善工程を含めた高品質な台本を生成します。
+2.  **読み上げ用整形**: 音声合成ソフト（COEIROINK等）での読み上げに最適な、文節区切りのテキストを出力します。
+3.  **音声・字幕素材生成 (gen-video-footage)**: 手動で生成した音声ファイルを結合し、タイミングを解析して字幕付きの動画素材（オーバーレイ用）を生成します。
 
 ## 🛠 使用技術 (Tech Stack)
 
 | カテゴリ           | 技術                                                  |
 | :----------------- | :---------------------------------------------------- |
 | **Language**       | Python 3.12 (slim)                                    |
-| **AI Model**       | Gemini 2.0 Flash (`gemini-2.0-flash-exp` 等)          |
+| **AI Model**       | Gemini 3.1 Flash Lite (設定により変更可能)            |
 | **Libraries**      | google-genai, pydantic, python-dotenv, pydub, moviepy |
 | **Infrastructure** | Docker, Docker Compose                                |
 
@@ -37,293 +33,123 @@
 
     ```text
     GEMINI_API_KEY=your_gemini_api_key    # Gemini APIの利用に必須
-    PIXABAY_API_KEY=your_pixabay_api_key  # 画像自動取得機能を使用する場合に必要
-    USE_DUMMY_GEMINI=false               # テスト用にAPIを叩かずダミーを使用する場合は true
     ```
 
 2.  **必要なディレクトリとファイルの準備**:
-    以下のファイル・ディレクトリは `.gitignore` で除外されていますが、実行に必要です。手動で作成または配置してください。
+    以下のファイル・ディレクトリは `.gitignore` で除外されていますが、実行に必要です。
     - **プロンプトテンプレート (`src/prompts/`)**:
       AIへの指示文を格納します。以下のファイルが必要です。
-      - `make_script.txt`: 基本台本生成（初稿）用
-      - `make_script_verify.txt`: 台本初稿の検証・改善用
-      - `add_character_script.txt`: キャラクター口調変換用
+      - `story_make_script.txt`: 台本初稿生成用
+      - `story_make_script_verify.txt`: 台本の検証・改善用
       - `output_coeroink_txt.txt`: COEIROINK形式整形用
-      - `generate_img_request.txt`: 画像リクエスト生成用
-
-      > [!IMPORTANT]
-      > プロンプトファイルは機密情報を含む可能性があるため、リポジトリには含まれていません。
-      > 以下の[プロンプト作成ガイドライン](#プロンプト作成ガイドライン)に従って各自作成してください。
+      - `add_character_script.txt`: キャラクター口調変換用（個別実行用）
     - **入力データ (`src/data/input/`)**:
-      - `trivia.txt`: 台本の元となる雑学テキスト（必須）
-      - `voice/`: 音声合成済みの素材を格納するディレクトリ
-        - `001_xxx.wav`, `001_xxx.txt` のような形式で、番号順に結合されます。
+      - `theme.txt`: 動画のテーマ（例：「驚きの雑学」「意外な結末」など）
+      - `trivia.txt`: 台本の元となる具体的な雑学情報
+      - `voice/`: 手動で生成した音声素材（`.wav` と `.txt` のペア。例：`001.wav`, `001.txt`）を格納
     - **作業・出力用 (実行時に自動生成)**:
-      - `src/data/output/`: 各ステージの中間データや最終成果物が出力されます。
-      - `src/logs/`: Gemini APIとの通信ログが保存されます。
-
-### プロンプト作成ガイドライン
-
-本プロジェクトでは、Gemini APIへの指示にXMLタグ形式のテンプレートを使用しています。独自のプロンプトを作成する場合は、以下の構成を推奨します。
-
-#### 基本構造
-
-プロンプトファイル（`.txt`）内では、以下のタグを使用して構成を整理してください。
-
-```text
-<system_role>
-AIの役割（例：Youtubeショート動画の構成作家）
-</system_role>
-
-<context>
-背景情報や動画のコンセプト、ターゲット層など
-</context>
-
-<constraints>
-- 出力は必ずJSON形式にすること
-- 解説は日本語で行うこと
-- 余計な挨拶は含めないこと
-</constraints>
-
-<input_data>
-$variable_name  <-- ここにプログラムからデータが注入されます
-</input_data>
-
-<output_format>
-期待するJSONの構造例を記述します。
-</output_format>
-
-<instruction>
-具体的な指示文を記述します。
-</instruction>
-```
-
-#### 各ファイルの役割と出力要件
-
-各ステージで期待されるJSONの構造は以下の通りです。これらに基づいて `response_schema` が適用されます。
-
-| ファイル名 | 役割 | 入力変数 | 期待される出力例 (JSON形式) |
-| :--- | :--- | :--- | :--- |
-| `make_script.txt` | 雑学から台本の初稿を生成 | `$trivia_text` | `{"thinking": "...", "title": "...", "script": "..."}` |
-| `make_script_verify.txt` | 初稿を検証し改善版を出力 | `$draft_title`, `$draft_script` | `{"verification_thinking": "...", "title": "...", "script": "..."}` |
-| `add_character_script.txt` | キャラクター口調に変換 | `$script_text` | `{"thinking": "...", "script": "..."}` |
-| `output_coeroink_txt.txt` | 読み上げ用に整形 | `$script_text` | `{"thinking": "...", "break_script": "..."}` |
-| `generate_img_request.txt` | 画像検索ワード生成 | `$voice_data` | `{"thinking": "...", "img_request": [{"time_start": 0, "time_end": 1000, "img_description": "cat"}, ...]}` |
-
-> [!TIP]
-> `thinking` フィールドはAIの思考過程を出力させるために設けています。これにより、最終的な出力（`script` や `title`）の精度向上が期待できます。
+      - `src/data/output/`: 各ステージの最終成果物が出力されます。
+      - `src/data/output/intermediate/`: 各工程の中間データ（JSON）が保存されます。
 
 ## 🔄 全体の実行フロー (Workflow Overview)
 
-動画を1本完成させるまでの全体の流れは以下の通りです。\
-**STEP 2は手動作業**が必要なため、パイプラインは2フェーズに分かれています。
+パイプラインは「台本生成」と「動画素材生成」の2フェーズに分かれています。
 
 ```mermaid
 flowchart TD
     classDef auto fill:#bfffbf,stroke:#4a4,stroke-width:1px,color:#000
     classDef manual fill:#fff0bf,stroke:#aa8,stroke-width:2px,stroke-dasharray:5 5,color:#000
     classDef artifact fill:#e8e8ff,stroke:#88a,stroke-width:1px,color:#000
-    classDef cmd fill:#ffbfbf,stroke:#a44,stroke-width:1px,color:#000
 
-    Start([開始]) --> Input
+    Start([開始]) --> Input1
+    Input1["📄 theme.txt / trivia.txt\n（テーマと情報を準備）"]:::artifact
 
-    Input["📄 trivia.txt\n（雑学テキストを作成）"]:::artifact
-
-    Input --> S1
-
-    subgraph STEP1["STEP ① 台本生成  |  gen-script"]
-        S1["make_script\n台本の初稿を生成\n✅ 検証・改善も自動実行"]:::auto
-        S2["add_character_script\nキャラクター口調に変換"]:::auto
-        S3["output_coeroink_txt\nCOEIROINK用テキスト整形"]:::auto
-        S1 --> S2 --> S3
+    subgraph STEP1["STEP ① 台本生成 | gen-script"]
+        S1["story_make_script\n（初稿生成 ＋ 検証・改善）"]:::auto
+        S3["output_coeroink_txt\n（読み上げ用整形）"]:::auto
+        S1 --> S3
     end
 
     S3 --> CoeroinkTxt
-
     CoeroinkTxt["📄 coeroink.txt\n（整形済み台本）"]:::artifact
 
     CoeroinkTxt --> M1
-
-    subgraph MANUAL["✋ 手動作業  |  COEIROINKで音声生成"]
-        M1["COEIROINKにテキストを貼り付け"]:::manual
-        M2["音声ファイルを書き出し\n001_xxx.wav / 001_xxx.txt"]:::manual
+    subgraph MANUAL["✋ 手動作業 | 音声生成"]
+        M1["COEIROINK等にテキストを貼り付け"]:::manual
+        M2["音声ファイルを書き出し\n（001_xxx.wav / 001_xxx.txt）"]:::manual
         M1 --> M2
     end
 
     M2 --> VoiceDir
+    VoiceDir["📁 src/data/input/voice/\n（音声を配置）"]:::artifact
 
-    VoiceDir["📁 src/data/input/voice/\n（音声ファイルを配置）"]:::artifact
-
-    VoiceDir --> S4
-
-    subgraph STEP2["STEP ② 動画素材生成  |  gen-video-footage"]
-        S4["generate_voice_data\n音声を結合・タイミング解析"]:::auto
-        S5["generate_subtitle\n字幕動画を生成"]:::auto
-        S6["generate_img_request\n画像リクエストをGeminiで生成"]:::auto
-        S7["fetch_images\nPixabayから画像をダウンロード"]:::auto
-        S8["generate_slideshow\nフェード付きスライドショー生成"]:::auto
+    subgraph STEP2["STEP ② 動画素材生成 | gen-video-footage"]
+        S4["generate_voice_data\n（音声結合・タイミング解析）"]:::auto
+        S5["generate_subtitle\n（字幕動画を生成）"]:::auto
         S4 --> S5
-        S4 --> S6
-        S6 --> S7 --> S8
     end
 
     S5 --> Out1["🎬 subtitle.mp4\n（字幕動画）"]:::artifact
-    S8 --> Out2["🎬 slides.mp4\n（スライドショー動画）"]:::artifact
     Out1 --> Finish
-    Out2 --> Finish
 
-    Finish(["動画編集ソフトで\n素材を合成して完成 🎉"])
+    Finish(["動画編集ソフトで背景やBGMを\n合成して完成 🎉"])
 ```
-
-> [!NOTE]
-> 緑のノードは自動実行、黄色の破線ノードは手動作業です。\
-> `subtitle.mp4`（字幕）と `slides.mp4`（スライドショー）は、その後お好みの動画編集ソフトで合成してください。
 
 ## 📖 使い方 (Usage)
 
-Docker Composeを利用してパイプラインを実行します。
-
-### 実行コマンド
-
-```bash
-docker-compose up --build
-```
-
-実行後、以下のファイルが生成されます：
-
-- `data/output/coeroink.txt`: 改行済み台本テキスト
-- `data/output/img_request.txt`: 必要な画像リスト
-
-### コンテナ内での操作
-
-```bash
-# コンテナの中に入って直接実行する場合
-docker-compose exec app bash
-python main.py [コマンド]
-```
-
 ### パイプライン実行 (`main.py`)
 
-一連の自動化フロー（パイプライン）を実行するためのメインスクリプトです。
+Dockerコンテナ内でメインの自動化フローを実行します。
 
-| コマンド            | 説明                                                                                                                             |
-| :------------------ | :------------------------------------------------------------------------------------------------------------------------------- |
-| `gen-script`        | 雑学テキストの読み込みから、ベース台本生成、キャラクター口調変換、COEIROINK形式出力までの全ステップを連続で実行します。          |
-| `gen-video-footage` | 音声データ生成、字幕動画作成、画像リクエスト生成、画像取得、スライドショー生成までの一連の動画素材作成パイプラインを実行します。 |
-| `gen-final-video`   | スライドショー生成、音声合成、中央字幕を統合した最終動画を一括生成します。(※現在は使用していません)                              |
+```bash
+# 台本生成パイプラインの実行
+docker-compose run --rm app python main.py gen-script
+
+# 動画素材（音源・字幕）生成パイプラインの実行
+docker-compose run --rm app python main.py gen-video-footage
+```
+
+| コマンド | 説明 |
+| :--- | :--- |
+| `gen-script` | テーマと雑学から、検証済みの台本とCOEIROINK用テキストを生成します。 |
+| `gen-video-footage` | 配置された音声素材から、結合音声(`voice.wav`)と字幕動画(`subtitle.mp4`)を生成します。 |
 
 ### 個別ステージ実行 (`stage_runner.py`)
 
-各処理（ステージ）を単独で個別に実行・テストするための手動実行用スクリプトです。
+特定の工程のみを個別にテストまたは実行する場合に使用します。
 
 ```bash
-# 台本作成のみ実行
-python stage_runner.py make-script
-
-# 音声生成のみ実行
-python stage_runner.py gen-voice
-
-# 画像取得のみ実行
-python stage_runner.py fetch-images
-
-# スライドショー生成のみ実行
-python stage_runner.py gen-slideshow
+docker-compose run --rm app python stage_runner.py [ステージ名]
 ```
 
-| 引数 (ステージ)   | 説明                                                                                                                     |
-| :---------------- | :----------------------------------------------------------------------------------------------------------------------- |
-| `make-script`     | 入力テキスト(`data/input/trivia.txt`)からベースとなる台本(`make_script.json`)のみを生成します。                          |
-| `add-char`        | 既存の台本データ(`make_script.json`)を元に、キャラクター口調の台本(`add_character.json`)のみに変換します。               |
-| `coeroink`        | 既存のキャラクター台本データ(`add_character.json`)を元に、COEIROINK用テキストが出力されます。                            |
-| `gen-voice`       | 録音済み音声ファイル(`data/input/voice/`)を結合し、音声(`voice.wav`)とメタデータ(`voice_data.json`)を生成します。        |
-| `gen-img-req`     | 音声のメタデータ(`voice_data.json`)をもとに、画像リクエストJSONをGeminiで生成します。                                    |
-| `fetch-images`    | 画像リクエスト(`img_request.json`)をもとに、Pixabayから画像をダウンロードし、画像リスト(`slide_imgs.json`)を生成します。 |
-| `gen-slideshow`   | 画像リスト(`slide_imgs.json`)をもとに、スライドショー動画(`slides.mp4`)を生成します。                                    |
-| `gen-subtitle`    | 音声のメタデータ(`voice_data.json`)をもとに、字幕のみの動画(`subtitle.mp4`)を生成します。                                |
-| `gen-final-video` | スライドショー、音声、字幕を統合した最終動画(`final_video.mp4`)を生成します。(※現在は使用していません)                   |
+| ステージ名 | 説明 |
+| :--- | :--- |
+| `make-script` | 台本のみを生成します（初稿＋検証）。 |
+| `add-char` | 既存の台本をキャラクター口調に変換します。 |
+| `coeroink` | 台本を読み上げ用に整形します。 |
+| `gen-voice` | 音声ファイルを結合し、タイミングデータを生成します。 |
+| `gen-subtitle` | タイミングデータから字幕動画を生成します。 |
 
-## 📊 生成されるデータの説明 (Data Descriptions)
+## 📊 生成データの説明
 
-各工程（ステージ）で生成される主要なデータとその役割は以下の通りです。ほとんどの中間データは `data/output/intermediate/` に保存されます。
+- **`data/output/coeroink.txt`**: 読み上げ用テキスト。タイトルとセリフが区切られて、実行のたびに追記されます。
+- **`data/output/voice.wav`**: 全ての音声を結合した最終的な音声トラック。
+- **`data/output/subtitle.mp4`**: 音声に同期したフルHDの字幕動画（オーバーレイ用）。
+- **`data/output/intermediate/`**: 各工程で生成されるJSON形式のデータ。
 
-### 台本・テキスト関連
-
-- **`make_script.json`**: 入力テキストから抽出された、タイトルと文節ごとの基本台本データ。
-- **`add_character.json`**: キャラクター固有の口調や表現に変換された台本データ。
-- **`coeroink.txt`**: 音声合成ソフト（COEIROINK等）での読み上げ用に改行・整形されたテキストファイル。
-
-### 音声・タイミング関連
-
-- **`voice.wav`**: 個別に生成された音声を結合した動画用のメイン音声ファイル。
-- **`voice_data.json`**: 各文節の音声の開始・終了時間や、画像切り替えタイミングを記録したメタデータ。
-
-### 画像・素材関連
-
-- **`img_request.json`**: Geminiによって生成された、各文節に最適な画像をPixabay等で検索するためのクエリリスト。
-- **`slide_imgs.json`**: ダウンロードされた画像のパスと、それに対応する文節のインデックスを管理するリスト。
-- **`slide_imgs/`**: (ディレクトリ) 実際にダウンロードされた各種素材画像が格納されます。
-
-### 動画成果物
-
-- **`slides.mp4`**: 音声のタイミングに合わせ、フェード効果をつけて画像を切り替えるスライドショー動画。
-- **`subtitle.mp4`**: 音声に合わせて中央にテロップを表示する、背景が透明（または特定色）の字幕動画。
-- **`final_video.mp4`**: スライドショー、音声、字幕をすべて統合した最終的な完成版動画。(※現在は利用停止中)
-
-## 📂 ディレクトリ構成 (Directory Structure)
+## 📂 ディレクトリ構成
 
 ```text
 .
 ├── src/
-│   ├── main.py          # 実行エントリーポイント (CLI、各パイプラインの呼び出し)
-│   ├── config.py        # パスやモデル設定などの全体定数
-│   ├── pipeline/        # 一連の自動化フロー（オーケストレーション）
-│   ├── stages/          # アトミックな各処理の実行単位（API通信、動画編集など）
-│   ├── util/            # アプリ内共通機能（ロギング、ファイルIO、Geminiクライアント）
-│   ├── model/           # Pydantic によるデータ構造定義 (レスポンス型など)
-│   ├── data/            # 入力データおよび出力結果
-│   ├── logs/            # Gemini API呼び出し時のプロンプトとレスポンスのログ
-│   └── prompts/         # Gemini用プロンプトのテンプレート
-├── Dockerfile           # Python環境定義
-├── docker-compose.yml   # 開発環境設定
-├── requirements.txt     # Python依存パッケージ
-└── .env                 # 環境変数
+│   ├── main.py          # 実行エントリーポイント
+│   ├── config.py        # 全体設定（モデル、パス、フォント設定等）
+│   ├── pipeline/        # オーケストレーション
+│   ├── stages/          # アトミックな各処理
+│   ├── util/            # 共通ユーティリティ
+│   ├── model/           # データ構造定義
+│   ├── data/            # 入力・出力データ
+│   └── prompts/         # プロンプトテンプレート
+├── requirements.txt
+└── .env
 ```
-
-### コンポーネント間の依存関係
-
-プロジェクトの各ディレクトリ・モジュールは、責務ごとに明確に分離されており、以下のような依存関係を持っています。
-
-```mermaid
-graph TD
-    classDef main fill:#ffbfbf,stroke:#333,stroke-width:1px,color:#000
-    classDef pipeline fill:#fff0bf,stroke:#333,stroke-width:1px,color:#000
-    classDef stages fill:#bfffbf,stroke:#333,stroke-width:1px,color:#000
-    classDef model fill:#dfbfff,stroke:#333,stroke-width:1px,color:#000
-
-    Main[src/main.py]:::main --> Pipeline[src/pipeline/]:::pipeline
-    Pipeline --> Stages[src/stages/]:::stages
-    Stages --> Model[src/model/]:::model
-```
-
-1.  **`src/main.py` (CLI / Entrypoint)**
-    - **役割**: ユーザーからのコマンド入力(`gen-script`, `gen-subtitle`等)を受け取り、適切なパイプラインを実行します。
-    - **依存**: `src/pipeline/` (実行フローの呼び出し)
-2.  **`src/pipeline/` (Orchestration)**
-    - **役割**: 複数の処理(Stage)をつなぎ合わせ、I/Oを含めた一連の作業フローを定義します。
-    - **依存**: `src/stages/` (アトミックな処理), `src/util/` (ファイル保存等)
-3.  **`src/stages/` (Processing Functions)**
-    - **役割**: Gemini APIによるテキスト生成や、MoviePyを用いた動画編集などのアトミックな機能を提供します。
-    - **依存**: `src/model/` (型定義), `src/util/` (APIクライアント等)
-    - **外部依存**: `moviepy`, `pydub`
-4.  **`src/util/` (Utilities)**
-    - **役割**: プロジェクト全体で使い回す汎用的な処理（APIクライアント初期化、ロギング、JSONの読み書き）をまとめます。
-    - **外部依存**: `google-genai` (Gemini API呼び出し), `python-dotenv` (環境変数展開)
-5.  **`src/model/` (Data Models)**
-    - **役割**: APIの構造化出力や内部でやり取りするデータのスキーマを定義します。
-    - **外部依存**: `pydantic`
-
-## 🌟 今後の展望 (Future Prospects)
-
-- **音声生成の完全自動化**: 現在は手動で音声を書き出していますが、COEIROINKのAPIを利用して、台本から音声を自動生成するステージの実装を予定されています。
-
-- **動画編集機能の強化**: 現在はスライドショー形式ですが、よりリッチな動画編集機能（BGMの自動選定・挿入、効果音の追加等）の実装を検討されています。
